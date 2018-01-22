@@ -261,7 +261,7 @@ bool CMetadata::build_layout_entries(vector<layout_t> &layouts)
     layout_t *layout_table = (layout_t *) alloc_buffer_from_metadata(size);
     if(layout_table == NULL)
     {
-        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
         return false;
     }
     m_metadata->dirs[DIR_LAYOUT].offset = (uint32_t)PTR_DIFF(layout_table, m_metadata);
@@ -296,7 +296,7 @@ bool CMetadata::build_layout_entries(vector<layout_t> &layouts)
     m_metadata->enclave_size = calculate_enclave_size(rva);
     if(m_metadata->enclave_size == (uint64_t)-1)
     {
-        se_trace(SE_TRACE_ERROR, OUT_OF_EPC_ERROR); 
+        se_trace(SE_TRACE_ERROR, OUT_OF_EPC_ERROR);
         return false;
     }
     // the last guard page entry to round the enclave size to power of 2
@@ -305,7 +305,7 @@ bool CMetadata::build_layout_entries(vector<layout_t> &layouts)
         layout_table = (layout_t *)alloc_buffer_from_metadata(sizeof(layout_t));
         if(layout_table == NULL)
         {
-            se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+            se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
             return false;
         }
         layout_table->entry.id = LAYOUT_ID_GUARD;
@@ -331,20 +331,20 @@ bool CMetadata::build_layout_table()
     layout.entry.id = LAYOUT_ID_HEAP;
     layout.entry.page_count = (uint32_t)(m_create_param.heap_max_size >> SE_PAGE_SHIFT);
     layout.entry.attributes = ADD_PAGE_ONLY;
-    layout.entry.si_flags = SI_FLAGS_RW;
+    layout.entry.si_flags = SI_FLAGS_RW | SI_FLAG_X;
     layouts.push_back(layout);
 
     // thread context memory layout
     // guard page | stack | TCS | SSA | guard page | TLS
- 
+
     // guard page
     layouts.push_back(guard_page);
 
-    // stack 
+    // stack
     layout.entry.id = LAYOUT_ID_STACK;
     layout.entry.page_count = (uint32_t)(m_create_param.stack_max_size >> SE_PAGE_SHIFT);
     layout.entry.attributes = ADD_EXTEND_PAGE;
-    layout.entry.si_flags = SI_FLAGS_RW;
+    layout.entry.si_flags = SI_FLAGS_RW | SI_FLAG_X;
     layout.entry.content_size = 0xCCCCCCCC;
     layouts.push_back(layout);
 
@@ -359,15 +359,15 @@ bool CMetadata::build_layout_table()
     tcs_t *tcs_template = (tcs_t *) alloc_buffer_from_metadata(TCS_TEMPLATE_SIZE);
     if(tcs_template == NULL)
     {
-        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
         return false;
     }
-    layout.entry.content_offset = (uint32_t)PTR_DIFF(tcs_template, m_metadata), 
+    layout.entry.content_offset = (uint32_t)PTR_DIFF(tcs_template, m_metadata),
     layout.entry.content_size = TCS_TEMPLATE_SIZE;
     layouts.push_back(layout);
     memset(&layout, 0, sizeof(layout));
 
-    // ssa 
+    // ssa
     layout.entry.id = LAYOUT_ID_SSA;
     layout.entry.page_count = SSA_FRAME_SIZE * SSA_NUM;
     layout.entry.attributes = ADD_EXTEND_PAGE;
@@ -407,7 +407,7 @@ bool CMetadata::build_layout_table()
     // tcs template
     if(false == build_tcs_template(tcs_template))
     {
-        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
         return false;
     }
     return true;
@@ -418,7 +418,7 @@ bool CMetadata::build_patch_entries(vector<patch_entry_t> &patches)
     patch_entry_t *patch_table = (patch_entry_t *) alloc_buffer_from_metadata(size);
     if(patch_table == NULL)
     {
-        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
         return false;
     }
     m_metadata->dirs[DIR_PATCH].offset = (uint32_t)PTR_DIFF(patch_table, m_metadata);
@@ -449,7 +449,7 @@ bool CMetadata::build_patch_table()
     uint8_t *gd_template = (uint8_t *)alloc_buffer_from_metadata(size);
     if(gd_template == NULL)
     {
-        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
         return false;
     }
     memcpy_s(gd_template, size, buf, size);
@@ -457,7 +457,7 @@ bool CMetadata::build_patch_table()
     uint64_t rva = m_parser->get_symbol_rva("g_global_data");
     if(0 == rva)
     {
-        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
          return false;
     }
 
@@ -470,7 +470,7 @@ bool CMetadata::build_patch_table()
     uint64_t *zero = (uint64_t *)alloc_buffer_from_metadata(sizeof(*zero));
     if(zero == NULL)
     {
-        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR); 
+        se_trace(SE_TRACE_ERROR, INVALID_ENCLAVE_ERROR);
         return false;
     }
     *zero = 0;
@@ -492,7 +492,7 @@ bool CMetadata::build_patch_table()
         patch.src = (uint32_t)PTR_DIFF(zero, m_metadata);
         patch.size = (uint32_t)sizeof(elf_hdr->e_shstrndx);
         patches.push_back(patch);
- 
+
         // Modify GNU_RELRO info to eliminate the impact of enclave measurement.
         Elf32_Phdr *prg_hdr = GET_PTR(Elf32_Phdr, base_addr, elf_hdr->e_phoff);
         for (unsigned idx = 0; idx < elf_hdr->e_phnum; ++idx, ++prg_hdr)
@@ -628,7 +628,7 @@ uint64_t CMetadata::calculate_sections_size()
 
     uint64_t size = (NULL == last_section) ? (0) : (last_section->get_rva() + last_section->virtual_size());
     size = ROUND_TO_PAGE(size);
-    
+
     return size;
 }
 
@@ -646,7 +646,7 @@ uint64_t CMetadata::calculate_enclave_size(uint64_t size)
         if(!round_size)
             return (uint64_t)-1;
     }
-    
+
     if(round_size > enclave_max_size)
         return (uint64_t)-1;
 
@@ -657,7 +657,7 @@ bool update_metadata(const char *path, const metadata_t *metadata, uint64_t meta
 {
     assert(path != NULL && metadata != NULL);
 
-    return write_data_to_file(path, std::ios::in | std::ios::binary| std::ios::out, 
+    return write_data_to_file(path, std::ios::in | std::ios::binary| std::ios::out,
         reinterpret_cast<uint8_t *>(const_cast<metadata_t *>( metadata)), metadata->size, (long)meta_offset);
 }
 
@@ -711,7 +711,7 @@ bool print_metadata(const char *path, const metadata_t *metadata)
     PRINT_ARRAY(meta_ofs, metadata, enclave_css.key.modulus, SE_KEY_SIZE);
     PRINT_ARRAY(meta_ofs, metadata, enclave_css.key.exponent, SE_EXPONENT_SIZE);
     PRINT_ARRAY(meta_ofs, metadata, enclave_css.key.signature, SE_KEY_SIZE);
-    
+
     // css.body
     PRINT_ELEMENT(meta_ofs, metadata, enclave_css.body.misc_select);
     PRINT_ELEMENT(meta_ofs, metadata, enclave_css.body.misc_mask);
@@ -724,7 +724,7 @@ bool print_metadata(const char *path, const metadata_t *metadata)
     PRINT_ELEMENT(meta_ofs, metadata, enclave_css.body.isv_svn);
 
     // css.buffer
-    PRINT_ARRAY(meta_ofs, metadata, enclave_css.buffer.q1, SE_KEY_SIZE); 
+    PRINT_ARRAY(meta_ofs, metadata, enclave_css.buffer.q1, SE_KEY_SIZE);
     PRINT_ARRAY(meta_ofs, metadata, enclave_css.buffer.q2, SE_KEY_SIZE);
 
     meta_ofs.close();
