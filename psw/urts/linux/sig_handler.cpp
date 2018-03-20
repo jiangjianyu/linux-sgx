@@ -114,7 +114,7 @@ void sig_handler(int signum, siginfo_t* siginfo, void *priv)
         //If exception is raised in trts again and again, the SSA will overflow, and finally it is EENTER exception.
         assert(reinterpret_cast<tcs_t *>(xbx) == param->tcs);
         CEnclave *enclave = param->trust_thread->get_enclave();
-        unsigned int ret = enclave->ecall(ECMD_EXCEPT, param->ocall_table, NULL);
+        unsigned int ret = enclave->ecall(ECMD_EXCEPT, param->ocall_table, (char*)(intptr_t)signum);
         if(SGX_SUCCESS == ret)
         {
             //ERESUME execute

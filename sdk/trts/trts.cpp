@@ -313,7 +313,7 @@ extern "C" int enter_enclave(int index, void *ms, void *tcs, int cssa)
     }
     else if((cssa == 1) && (index == ECMD_EXCEPT))
     {
-        error = trts_handle_exception(tcs);
+        error = trts_handle_exception(tcs, (int)(intptr_t)ms);
     }
     if(error == SGX_ERROR_UNEXPECTED)
     {

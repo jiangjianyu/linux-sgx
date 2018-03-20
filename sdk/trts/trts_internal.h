@@ -71,7 +71,7 @@ void set_enclave_state(int state);
 sgx_status_t do_init_enclave(void *ms);
 sgx_status_t do_ecall(int index, void *ms, void *tcs);
 sgx_status_t do_oret(void *ms);
-sgx_status_t trts_handle_exception(void *tcs);
+sgx_status_t trts_handle_exception(void *tcs, int sig_code);
 #ifdef __cplusplus
 }
 #endif

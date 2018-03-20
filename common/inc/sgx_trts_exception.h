@@ -57,6 +57,8 @@ typedef enum _sgx_exception_vector_t
     SGX_EXCEPTION_VECTOR_MF = 16, /* x87 FPU floating-point or WAIT/FWAIT instruction */
     SGX_EXCEPTION_VECTOR_AC = 17, /* Any data reference in memory */
     SGX_EXCEPTION_VECTOR_XM = 19, /* SSE/SSE2/SSE3 floating-point instruction */
+    SGX_EXCEPTION_VECTOR_SK = 20, /* Stack Overflow */
+    SGX_EXCEPTION_VECTOR_SEV = 21 /* segmentation fault */
 } sgx_exception_vector_t;
 
 typedef enum _sgx_exception_type_t

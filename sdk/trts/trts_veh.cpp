@@ -287,7 +287,7 @@ failed_end:
 //      none zero - success
 //              0 - fail
 #include "trts_internal.h"
-extern "C" sgx_status_t trts_handle_exception(void *tcs)
+extern "C" sgx_status_t trts_handle_exception(void *tcs, int sig_code)
 {
     thread_data_t *thread_data = get_thread_data();
     ssa_gpr_t *ssa_gpr = NULL;
@@ -340,7 +340,7 @@ extern "C" sgx_status_t trts_handle_exception(void *tcs)
         return SGX_ERROR_STACK_OVERRUN;
     }
 
-    if(ssa_gpr->exit_info.valid != 1)
+    if(ssa_gpr->exit_info.valid != 1 && sig_code != 11)
     {   // exception handlers are not allowed to call in a non-exception state
         goto default_handler;
     }
@@ -351,6 +351,9 @@ extern "C" sgx_status_t trts_handle_exception(void *tcs)
 
     // initialize the info with SSA[0]
     info->exception_vector = (sgx_exception_vector_t)ssa_gpr->exit_info.vector;
+    if (sig_code == 11) {
+        info->exception_vector = SGX_EXCEPTION_VECTOR_SEV;
+    }
     info->exception_type = (sgx_exception_type_t)ssa_gpr->exit_info.exit_type;
 
     info->cpu_context.REG(ax) = ssa_gpr->REG(ax);
