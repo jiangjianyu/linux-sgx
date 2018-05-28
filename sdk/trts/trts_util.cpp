@@ -34,6 +34,7 @@
 #include "global_data.h"
 #include "util.h"
 #include "thread_data.h"
+#include "linux/elf_parser.h"
 
 // No need to check the state of enclave or thread.
 // The functions should be called within an ECALL, so the enclave and thread must be initialized at that time.
@@ -69,3 +70,6 @@ bool is_valid_sp(uintptr_t sp)
 }
 
 
+void* get_function(const char* func) {
+    return func_addr(func);
+}

@@ -51,6 +51,15 @@ extern "C" {
 */
 int SGXAPI sgx_is_within_enclave(const void *addr, size_t size);
 
+/* sgx_get_func
+ * Parameters:
+ *      func_name - the name of the globally declare function
+ * Return Value:
+ *      0 - the function is not found in the enclave .dynsym table
+ *      non-zero - the address of the func_name function
+ */
+void* SGXAPI sgx_get_func(const char *func_name);
+
 /* sgx_is_outside_enclave()
  * Parameters:
  *      addr - the start address of the buffer

@@ -43,12 +43,14 @@
 #ifdef SE_SIM
 #include "t_instructions.h"    /* for `g_global_data_sim' */
 #include "sgx_spinlock.h"
+#include "trts_util.h"
 #endif
 
 
 
 #ifndef SE_SIM
 
+#include "trts_util.h"
 #include "se_cdefs.h"
 
 // add a version to trts
@@ -65,6 +67,10 @@ SGX_ACCESS_VERSION(trts, 1);
 //      0 - the whole buffer or part of the buffer is not within the enclave,
 //          or the buffer is wrap around
 //
+void* SGXAPI sgx_get_func(const char *addr) {
+    return get_function(addr);
+}
+
 int sgx_is_within_enclave(const void *addr, size_t size)
 {
     size_t start = reinterpret_cast<size_t>(addr);

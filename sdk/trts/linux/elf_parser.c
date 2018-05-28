@@ -34,11 +34,14 @@
  * This file is part of trusted loader for tRTS.
  */
 
+#include <string.h>
 #include "elf_parser.h"
 #include "rts.h"
 #include "util.h"
 #include "elf_util.h"
 #include "global_data.h"
+
+extern void *get_enclave_base(void);
 
 static int elf_tls_aligned_virtual_size(const void *enclave_base,
                             size_t *aligned_virtual_size);
@@ -108,7 +111,7 @@ static int do_relocs(const ElfW(Addr) enclave_base,
             case R_X86_64_DTPMOD64:
                 *reloc_addr = 1;
                 break;
- 
+
             case R_X86_64_DTPOFF64:
                 sym = get_sym(symtab, ELF64_R_SYM(rela->r_info));
                 if(!sym)
@@ -186,7 +189,7 @@ static int do_relocs(const ElfW(Addr) enclave_base,
             case R_386_TLS_DTPMOD32:
                 *reloc_addr = 1;
                 break;
- 
+
             case R_386_TLS_DTPOFF32:
                 *reloc_addr = sym->st_value;
                 break;
@@ -398,7 +401,7 @@ int elf_get_init_array(const void* enclave_base,
             size_t      count;
             size_t      n_dyn = phdr->p_filesz/sizeof(ElfW(Dyn));
             ElfW(Dyn)   *dyn = GET_PTR(ElfW(Dyn), ehdr, phdr->p_paddr);
-            
+
             for (count = 0; count < n_dyn; count++, dyn++)
             {
                 switch (dyn->d_tag)
@@ -415,5 +418,102 @@ int elf_get_init_array(const void* enclave_base,
     }
 
     return 0;
+}
+
+#define Elf_Sym		Elf64_Sym
+
+unsigned int elf_hash(const unsigned char* name) {
+    uint32_t h = 0, g;
+    for (; *name; name++) {
+        h = (h << 4) + *name;
+        g = h & 0xf0000000;
+        if (g) {
+            h ^= g >> 24;
+        }
+        h &= ~g;
+    }
+    return h;
+}
+
+void* func_addr(const char* func) {
+    void* enclave_base = get_enclave_base();
+    ElfW(Half) phnum = 0;
+    ElfW(Ehdr) *ehdr = (ElfW(Ehdr)*)enclave_base;
+    ElfW(Phdr) *phdr = get_phdr(ehdr);
+
+    if (ehdr == NULL)
+        return (void*)(-2);  /* Invalid image. */
+
+    ElfW(Addr)   sym_offset     = 0;
+    ElfW(Addr)   str_offset     = 0;
+    ElfW(Addr)   hash_offset    = 0;
+
+    for (; phnum < ehdr->e_phnum; phnum++, phdr++)
+    {
+        /* Search for dynamic segment */
+        if (phdr->p_type == PT_DYNAMIC)
+        {
+            size_t      count;
+            size_t      n_dyn = phdr->p_filesz/sizeof(ElfW(Dyn));
+            ElfW(Dyn)   *dyn = GET_PTR(ElfW(Dyn), ehdr, phdr->p_paddr);
+
+            for (count = 0; count < n_dyn; count++, dyn++)
+            {
+                if (dyn->d_tag == DT_NULL)  /* End */
+                    break;
+
+                switch (dyn->d_tag)
+                {
+                    case DT_SYMTAB: /* symbol table */
+                        sym_offset = dyn->d_un.d_ptr;
+                        break;
+
+                    case DT_HASH:/* Rel (x86) or Rela (x64) relocs */
+                        hash_offset = dyn->d_un.d_ptr;
+                        break;
+
+                    case DT_STRTAB:
+                        str_offset = dyn->d_un.d_val;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+
+    if (!sym_offset || !str_offset || !hash_offset) return (NULL);
+
+    const char* strtab = (char*)((uintptr_t)enclave_base + str_offset);      /* string table */
+    const Elf_Sym* symtab = (Elf_Sym*)((uintptr_t)enclave_base + sym_offset);   /* symbol table */
+    uint32_t* hashtab = (uint32_t*)((uintptr_t)enclave_base + hash_offset); /* hash table */
+
+    const uint32_t hash = elf_hash((unsigned char*)func);
+
+    const uint32_t nbucket = hashtab[0];
+    const uint32_t* bucket = &hashtab[2];
+    const uint32_t* chain =  &bucket[nbucket];
+    uint32_t i = bucket[hash % nbucket];
+    if (i == STN_UNDEF) {
+        return (void*)(strtab + symtab[0].st_name);
+    }
+
+    for (; i != STN_UNDEF; i = chain[i]) {
+        const Elf_Sym *sym = &symtab[i];
+        if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC)
+            continue;
+        if (ELF64_ST_BIND(sym->st_info) != STB_GLOBAL &&
+                ELF64_ST_BIND(sym->st_info) != STB_WEAK)
+            continue;
+        if (sym->st_shndx == SHN_UNDEF)
+            continue;
+
+        if (strcmp(func, strtab + symtab[i].st_name) != 0)
+            continue;
+        return (void*)((uintptr_t)enclave_base + symtab[i].st_value);
+    }
+
+    return NULL;
 }
 /* vim: set ts=4 sw=4 et cin: */
