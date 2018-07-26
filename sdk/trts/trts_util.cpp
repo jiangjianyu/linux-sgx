@@ -71,5 +71,9 @@ bool is_valid_sp(uintptr_t sp)
 
 
 void* get_function(const char* func) {
-    return func_addr(func);
+    return func_addr(NULL, func);
+}
+
+void* get_function_from(const void* from, const char* func) {
+    return func_addr(from, func);
 }

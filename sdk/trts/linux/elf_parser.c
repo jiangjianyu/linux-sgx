@@ -435,8 +435,9 @@ unsigned int elf_hash(const unsigned char* name) {
     return h;
 }
 
-void* func_addr(const char* func) {
-    void* enclave_base = get_enclave_base();
+void* func_addr(const void* enclave_base, const char* func) {
+    if (enclave_base == NULL)
+        enclave_base = get_enclave_base();
     ElfW(Half) phnum = 0;
     ElfW(Ehdr) *ehdr = (ElfW(Ehdr)*)enclave_base;
     ElfW(Phdr) *phdr = get_phdr(ehdr);
