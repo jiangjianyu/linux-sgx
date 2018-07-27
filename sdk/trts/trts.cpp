@@ -71,6 +71,10 @@ void* SGXAPI sgx_get_func(const char *addr) {
     return get_function(addr);
 }
 
+void* SGXAPI sgx_get_func_from(const void *base_addr, const char *addr) {
+    return get_function_from(base_addr, addr);
+}
+
 int sgx_is_within_enclave(const void *addr, size_t size)
 {
     size_t start = reinterpret_cast<size_t>(addr);
