@@ -456,7 +456,7 @@ void* func_addr(const void* enclave_base, const char* func) {
         {
             size_t      count;
             size_t      n_dyn = phdr->p_filesz/sizeof(ElfW(Dyn));
-            ElfW(Dyn)   *dyn = GET_PTR(ElfW(Dyn), ehdr, phdr->p_paddr);
+            ElfW(Dyn)   *dyn = GET_PTR(ElfW(Dyn), ehdr, phdr->p_offset);
 
             for (count = 0; count < n_dyn; count++, dyn++)
             {
