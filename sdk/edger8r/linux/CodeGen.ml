@@ -778,9 +778,7 @@ let mk_check_ptr (name: string) (lenvar: string) =
   in sprintf "\t%s(%s, %s);\n" checker name lenvar
 
 (* Pointer to marshaling structure should never be NULL. *)
-let mk_check_pms (fname: string) =
-  let lenvar = sprintf "sizeof(%s)" (mk_ms_struct_name fname)
-  in sprintf "\t%s(%s, %s);\n" "CHECK_REF_POINTER" ms_ptr_name lenvar
+let mk_check_pms (fname: string) = ""
 
 (* Generate code to get the size of the pointer. *)
 let gen_ptr_size (ty: Ast.atype) (pattr: Ast.ptr_attr) (name: string) (get_parm: string -> string) =
@@ -1163,38 +1161,7 @@ let tproxy_fill_ms_field (pd: Ast.pdecl) =
                __FUNCTION__ \"' is dangerous. No code generated.\")\n" name
           else
             let in_ptr_dst_name = mk_in_ptr_dst_name attr.Ast.pa_rdonly parm_accessor in
-              if not attr.Ast.pa_chkptr (* [user_check] specified *)
-              then sprintf "%s = SGX_CAST(%s, %s);" parm_accessor tystr name
-              else
-                match attr.Ast.pa_direction with
-                  Ast.PtrOut ->
-                    let code_template =
-                      [sprintf "if (%s != NULL && sgx_is_within_enclave(%s, %s)) {" name name len_var;
-                       sprintf "\t%s = (%s)__tmp;" parm_accessor tystr;
-                       sprintf "\t__tmp = (void *)((size_t)__tmp + %s);" len_var;
-                       sprintf "\tmemset(%s, 0, %s);" in_ptr_dst_name len_var;
-                       sprintf "} else if (%s == NULL) {" name;
-                       sprintf "\t%s = NULL;" parm_accessor;
-                       "} else {";
-                       "\tsgx_ocfree();";
-                       "\treturn SGX_ERROR_INVALID_PARAMETER;";
-                       "}"
-                      ]
-                    in List.fold_left (fun acc s -> acc ^ s ^ "\n\t") "" code_template
-                | _ ->
-                    let code_template =
-              [sprintf "if (%s != NULL && sgx_is_within_enclave(%s, %s)) {" name name len_var;
-               sprintf "\t%s = (%s)__tmp;" parm_accessor tystr;
-               sprintf "\t__tmp = (void *)((size_t)__tmp + %s);" len_var;
-               sprintf "\tmemcpy(%s, %s, %s);" in_ptr_dst_name name len_var;
-               sprintf "} else if (%s == NULL) {" name;
-               sprintf "\t%s = NULL;" parm_accessor;
-               "} else {";
-               "\tsgx_ocfree();";
-               "\treturn SGX_ERROR_INVALID_PARAMETER;";
-               "}"
-              ]
-                    in List.fold_left (fun acc s -> acc ^ s ^ "\n\t") "" code_template
+              sprintf "%s = SGX_CAST(%s, %s);" parm_accessor tystr name
 
 (* Generate local variables required for the trusted proxy. *)
 let gen_tproxy_local_vars (plist: Ast.pdecl list) =
@@ -1216,25 +1183,14 @@ let gen_tproxy_local_vars (plist: Ast.pdecl list) =
 (* Generate only one ocalloc block required for the trusted proxy. *)
 let gen_ocalloc_block (fname: string) (plist: Ast.pdecl list) =
   let ms_struct_name = mk_ms_struct_name fname in
-  let local_vars_block = sprintf "%s* %s = NULL;\n\tsize_t ocalloc_size = sizeof(%s);\n\tvoid *__tmp = NULL;\n\n" ms_struct_name ms_struct_val ms_struct_name in
+  let local_vars_block = sprintf "%s* %s = NULL;" ms_struct_name ms_struct_val in
   let count_ocalloc_size (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
-    if not attr.Ast.pa_chkptr then ""
-    else sprintf "\tocalloc_size += (%s != NULL && sgx_is_within_enclave(%s, %s)) ? %s : 0;\n" name name (mk_len_var name) (mk_len_var name)
-  in
+    ""
+    in
   let do_count_ocalloc_size (pd: Ast.pdecl) =
-    let (pty, declr) = pd in
-      match pty with
-        Ast.PTVal _          -> ""
-      | Ast.PTPtr (ty, attr) -> count_ocalloc_size ty attr declr.Ast.identifier
+    ""
   in
   let do_gen_ocalloc_block = [
-      "\n\t__tmp = sgx_ocalloc(ocalloc_size);\n";
-      "\tif (__tmp == NULL) {\n";
-      "\t\tsgx_ocfree();\n";
-      "\t\treturn SGX_ERROR_UNEXPECTED;\n";
-      "\t}\n";
-      sprintf "\t%s = (%s*)__tmp;\n" ms_struct_val ms_struct_name;
-      sprintf "\t__tmp = (void *)((size_t)__tmp + sizeof(%s));\n" ms_struct_name;
       ]
   in
   let new_param_list = List.map conv_array_to_ptr plist
@@ -1249,27 +1205,9 @@ let gen_func_tproxy (ufunc: Ast.untrusted_func) (idx: int) =
   let func_open = sprintf "%s\n{\n" (gen_tproxy_proto fd) in
   let local_vars = gen_tproxy_local_vars fd.Ast.plist in
   let ocalloc_ms_struct = gen_ocalloc_block fd.Ast.fname fd.Ast.plist in
-  let gen_ocfree rtype plist =
-    if rtype = Ast.Void && plist = [] then "" else "\tsgx_ocfree();\n"
-  in
-  let handle_out_ptr plist =
-    let copy_memory (attr: Ast.ptr_attr) (declr: Ast.declarator) =
-      let name = declr.Ast.identifier in
-        match attr.Ast.pa_direction with
-            Ast.PtrInOut | Ast.PtrOut ->
-              sprintf "\tif (%s) memcpy((void*)%s, %s, %s);\n" name name (mk_parm_accessor name) (mk_len_var name)
-          | _ -> ""
-    in List.fold_left (fun acc (pty, declr) ->
-             match pty with
-                             Ast.PTVal _ -> acc
-               | Ast.PTPtr(ty, attr) -> acc ^ copy_memory attr declr) "" plist in
 
   let set_errno = if propagate_errno then "\terrno = ms->ocall_errno;" else "" in
-  let func_close = sprintf "%s%s\n%s%s\n"
-                           (handle_out_ptr fd.Ast.plist)
-                           set_errno
-                           (gen_ocfree fd.Ast.rtype fd.Ast.plist)
-                           "\treturn status;\n}" in
+  let func_close = sprintf "\treturn status;\n}" in
   let ocall_null = sprintf "status = sgx_ocall(%d, NULL);\n" idx in
   let ocall_with_ms = sprintf "status = sgx_ocall(%d, %s);\n"
                               idx ms_struct_val in

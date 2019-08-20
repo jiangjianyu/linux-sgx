@@ -1,72 +1,90 @@
-/*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Intel Corporation nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Created by Maxxie Jiang on 2/8/2019.
+//
 
-
-#include "sgx_error.h"
+#include <dlfcn.h>
 #include "sgx_urts.h"
-#include "se_types.h"
-#include <errno.h>
+#include "sim.h"
+#include <sys/mman.h>
+#include <stdio.h>
 #include <fcntl.h>
-#include <limits.h>
+#include <unistd.h>
+#include <sgx_edger8r.h>
+#include <errno.h>
 
-#include "urts_com.h"
-extern "C" sgx_status_t sgx_create_enclave(const char *file_name, const int debug, sgx_launch_token_t *launch_token, int *launch_token_updated, sgx_enclave_id_t *enclave_id, sgx_misc_attribute_t *misc_attr)
-{
-    sgx_status_t ret = SGX_SUCCESS;
+sgx_enclave_id_t eid = 0;
 
-    //Only true or false is valid
-    if(TRUE != debug &&  FALSE != debug)
-        return SGX_ERROR_INVALID_PARAMETER;
+void* lib_fd = 0;
 
-    int fd = open(file_name, O_RDONLY);
-    if(-1 == fd)
-    {
-        SE_TRACE(SE_TRACE_ERROR, "Couldn't open the enclave file, error = %d\n", errno);
-        return SGX_ERROR_ENCLAVE_FILE_ACCESS;
-    }
-    se_file_t file = {NULL, 0, false};
-    char resolved_path[PATH_MAX];
-    file.name = realpath(file_name, resolved_path);
-    file.name_len = (uint32_t)strlen(resolved_path);
+void* enclave_base = 0;
 
-    ret = _create_enclave(!!debug, fd, file, NULL, launch_token, launch_token_updated, enclave_id, misc_attr);
-    if(SGX_SUCCESS != ret && misc_attr)
-    {
-        sgx_misc_attribute_t plat_cap;
-        memset(&plat_cap, 0, sizeof(plat_cap));
-        get_enclave_creator()->get_plat_cap(&plat_cap);
-        memcpy_s(misc_attr, sizeof(sgx_misc_attribute_t), &plat_cap, sizeof(sgx_misc_attribute_t));
-    }
+typedef sgx_status_t (*enclave_entry_t)(sgx_enclave_id_t, const int, const void*, void*);
 
+typedef sgx_status_t (*enclave_init_t)(void* enclave_base, int size, int heap_size, int stack_size, void* ocall_entry);
+
+enclave_entry_t enclave_entry_func = 0;
+
+typedef struct {
+    size_t nr_ocall;
+    void * table[1];
+} ocall_entry;
+
+extern ocall_entry ocall_table_enclave;
+
+sgx_status_t SGXAPI sgx_create_enclave(const char *file_name, const int debug, sgx_launch_token_t *launch_token,
+        int *launch_token_updated, sgx_enclave_id_t *enclave_id, sgx_misc_attribute_t *misc_attr) {
+    (void)debug;
+    (void)launch_token;
+    (void)launch_token_updated;
+    (void)enclave_id;
+    (void)misc_attr;
+    
+    int enclave_size = 0x100000;
+    int fd = open("/dev/zero", O_RDWR);
+    enclave_base = mmap(0, enclave_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     close(fd);
 
-    return ret;
+    // open enclave lib
+    lib_fd = dlopen(file_name, RTLD_NOW | RTLD_LOCAL);
+    if (lib_fd == 0) {
+        printf("errono %s\n", dlerror());
+        return SGX_ERROR_UNEXPECTED;
+    }
+
+    // hook sgx_ecall
+    enclave_entry_func = (enclave_entry_t)dlsym(lib_fd, "sgx_ecall");
+    if (!enclave_entry_func){
+        printf("cannot find entry sgx_ecall\n");
+        return SGX_ERROR_UNEXPECTED;
+    } 
+
+    // setup memory
+
+    enclave_init_t enclave_init = (enclave_init_t)dlsym(lib_fd, "setup_memory_ocall");
+    if (enclave_init == NULL) {
+        printf("cannot find entry setup_memory_ocall\n");
+        return SGX_ERROR_UNEXPECTED;
+    }
+    enclave_init(enclave_base, enclave_size, int(enclave_size * .8), enclave_size - int(enclave_size * .8), (void*)sgx_ocall);
+
+    return SGX_SUCCESS;
+}
+
+sgx_status_t SGXAPI sgx_destroy_enclave(const sgx_enclave_id_t enclave_id) {
+    (void)enclave_id;
+    dlclose(lib_fd);
+    return SGX_SUCCESS;
+}
+
+sgx_status_t sgx_ecall(const sgx_enclave_id_t enclave_id, const int proc, const void *ocall_table, void *ms)
+{
+    return enclave_entry_func(enclave_id, proc, ocall_table, ms);
+}
+
+typedef sgx_status_t (*ocall_t)(void*);
+
+sgx_status_t sgx_ocall(const unsigned int index,
+                       void* ms) {
+    ocall_t ocall = (ocall_t)ocall_table_enclave.table[index];
+    return ocall(ms);
 }

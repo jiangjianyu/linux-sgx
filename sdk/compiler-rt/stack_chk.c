@@ -47,16 +47,16 @@ __stack_chk_fail_local (void)
     __stack_chk_fail ();
 }
 
-extern void * __intel_security_cookie;
+// extern void * __intel_security_cookie;
 
-#ifdef __x86_64__
-void __intel_security_check_cookie(void * cookie)
-#else
-void __attribute__ ((regparm(1))) __intel_security_check_cookie(void * cookie)
-#endif /* __x86_64__ */
-{
-    if (cookie == __intel_security_cookie)
-        return;
-    abort();
-}
+// #ifdef __x86_64__
+// void __intel_security_check_cookie(void * cookie)
+// #else
+// void __attribute__ ((regparm(1))) __intel_security_check_cookie(void * cookie)
+// #endif /* __x86_64__ */
+// {
+//     if (cookie == __intel_security_cookie)
+//         return;
+//     abort();
+// }
 

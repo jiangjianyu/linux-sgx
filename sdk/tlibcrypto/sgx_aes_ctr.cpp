@@ -31,7 +31,6 @@
 
 
 #include "sgx_tcrypto.h"
-#include "ippcp.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -52,59 +51,12 @@ sgx_status_t sgx_aes_ctr_encrypt(const sgx_aes_ctr_128bit_key_t *p_key, const ui
                                 const uint32_t src_len, uint8_t *p_ctr, const uint32_t ctr_inc_bits,
                                 uint8_t *p_dst)
 {
-    IppStatus error_code = ippStsNoErr;
-    IppsAESSpec* ptr_ctx = NULL;
-    int ctx_size = 0;
-
-    if ((p_key == NULL) || (p_src == NULL) || (p_ctr == NULL) || (p_dst == NULL))
-    {
-        return SGX_ERROR_INVALID_PARAMETER;
-    }
-
-    // AES-CTR-128 encryption
-    error_code = ippsAESGetSize(&ctx_size);
-    if (error_code != ippStsNoErr)
-    {
-        return SGX_ERROR_UNEXPECTED;
-    }
-    ptr_ctx = (IppsAESSpec*)malloc(ctx_size);
-    if (ptr_ctx == NULL)
-    {
-        return SGX_ERROR_OUT_OF_MEMORY;
-    }
-
-    // Init
-    error_code = ippsAESInit((const Ipp8u*)p_key, SGX_AESCTR_KEY_SIZE, ptr_ctx, ctx_size);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(ptr_ctx, ctx_size, 0, ctx_size);
-        free(ptr_ctx);
-        switch (error_code)
-        {
-        case ippStsMemAllocErr: return SGX_ERROR_OUT_OF_MEMORY;
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    error_code = ippsAESEncryptCTR(p_src, p_dst, src_len, ptr_ctx, p_ctr, ctr_inc_bits);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(ptr_ctx, ctx_size, 0, ctx_size);
-        free(ptr_ctx);
-        switch (error_code)
-        {
-        case ippStsCTRSizeErr:
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    // Clear temp State before free.
-    memset_s(ptr_ctx, ctx_size, 0, ctx_size);
-    free(ptr_ctx);
+    (void) p_key;
+    (void) p_src;
+    (void) src_len;
+    (void) p_ctr;
+    (void) ctr_inc_bits;
+    (void) p_dst;
     return SGX_SUCCESS;
 }
 
@@ -112,58 +64,11 @@ sgx_status_t sgx_aes_ctr_decrypt(const sgx_aes_ctr_128bit_key_t *p_key, const ui
                                 const uint32_t src_len, uint8_t *p_ctr, const uint32_t ctr_inc_bits,
                                 uint8_t *p_dst)
 {
-    IppStatus error_code = ippStsNoErr;
-    IppsAESSpec* ptr_ctx = NULL;
-    int ctx_size = 0;
-
-    if ((p_key == NULL) || (p_src == NULL) || (p_ctr == NULL) || (p_dst == NULL))
-    {
-        return SGX_ERROR_INVALID_PARAMETER;
-    }
-
-    // AES-CTR-128 encryption
-    error_code = ippsAESGetSize(&ctx_size);
-    if (error_code != ippStsNoErr)
-    {
-        return SGX_ERROR_UNEXPECTED;
-    }
-    ptr_ctx = (IppsAESSpec*)malloc(ctx_size);
-    if (ptr_ctx == NULL)
-    {
-        return SGX_ERROR_OUT_OF_MEMORY;
-    }
-
-    // Init
-    error_code = ippsAESInit((const Ipp8u*)p_key, SGX_AESCTR_KEY_SIZE, ptr_ctx, ctx_size);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(ptr_ctx, ctx_size, 0, ctx_size);
-        free(ptr_ctx);
-        switch (error_code)
-        {
-        case ippStsMemAllocErr: return SGX_ERROR_OUT_OF_MEMORY;
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    error_code = ippsAESDecryptCTR(p_src, p_dst, src_len, ptr_ctx, p_ctr, ctr_inc_bits);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(ptr_ctx, ctx_size, 0, ctx_size);
-        free(ptr_ctx);
-        switch (error_code)
-        {
-        case ippStsCTRSizeErr:
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    // Clear temp State before free.
-    memset_s(ptr_ctx, ctx_size, 0, ctx_size);
-    free(ptr_ctx);
+    (void) p_key;
+    (void) p_src;
+    (void) src_len;
+    (void) p_ctr;
+    (void) ctr_inc_bits;
+    (void) p_dst;
     return SGX_SUCCESS;
 }

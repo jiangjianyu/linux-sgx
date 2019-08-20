@@ -29,31 +29,28 @@
  *
  */
 
-#ifndef _CPU_FEATURES_H_
-#define _CPU_FEATURES_H_
 
-#include "cpuid.h"
+#include "internal/global_init.h"
+#include "global_data.h"
+#include "internal/util.h"
+#include "sgx_trts.h"
+#include <assert.h>
+#include <stdlib.h>
 
-void get_cpu_features(uint64_t *__intel_cpu_feature_indicator);
+extern "C" {
 
-inline void sgx_cpuid(unsigned int in_eax, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx)
+typedef void (*fp_t)(void);
+
+/* required by global constructor when -fuse-cxa-atexit is enabled */
+void *__dso_handle __attribute__((weak)) = &(__dso_handle);
+
+int __cxa_atexit(void (*fun)(void *), void *para, void *dso)
 {
-    int cpu_info[4] = {0};
-    __cpuid(cpu_info, in_eax);
-    *eax = cpu_info[0];
-    *ebx = cpu_info[1];
-    *ecx = cpu_info[2];
-    *edx = cpu_info[3];
+    (void)(fun);
+    (void)(para);
+    (void)(dso);
+
+    return 0;
 }
 
-inline void sgx_cpuidex(unsigned int in_eax, unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx)
-{
-    int cpu_info[4] = {0};
-    __cpuidex(cpu_info, in_eax, leaf);
-    *eax = cpu_info[0];
-    *ebx = cpu_info[1];
-    *ecx = cpu_info[2];
-    *edx = cpu_info[3];
 }
-
-#endif

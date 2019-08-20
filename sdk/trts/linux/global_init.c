@@ -42,7 +42,7 @@
 typedef void (*fp_t)(void);
 
 /* required by global constructor when -fuse-cxa-atexit is enabled */
-void *__dso_handle __attribute__((weak)) = &(__dso_handle);
+// void *__dso_handle __attribute__((weak)) = &(__dso_handle);
 
 int __cxa_atexit(void (*fun)(void *), void *para, void *dso)
 {

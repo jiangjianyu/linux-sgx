@@ -32,6 +32,7 @@
 #define TRTS_INTERNAL_H
 
 #include "util.h"
+#include "sgx_eid.h"
 
 #ifdef SE_64
 #define STATIC_STACK_SIZE 8*100
@@ -60,6 +61,11 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef sgx_status_t (*ecall_t)(void*);
+
+typedef sgx_status_t (*sgx_ocall_t)(const unsigned int index, void* ms);
+
 extern ecall_table_t g_ecall_table;
 extern entry_table_t g_dyn_entry_table;
 
@@ -68,10 +74,12 @@ void *get_enclave_base();
 int get_enclave_state();
 void set_enclave_state(int state);
 
-sgx_status_t do_init_enclave(void *ms);
-sgx_status_t do_ecall(int index, void *ms, void *tcs);
-sgx_status_t do_oret(void *ms);
-sgx_status_t trts_handle_exception(void *tcs, int sig_code);
+sgx_status_t setup_memory_ocall(void *enclave_base, int size, int heap_size, int stack_size, void *ocall_entry);
+
+sgx_status_t sgx_ecall(const sgx_enclave_id_t enclave_id, const int proc, const void *ocall_table, void *ms);
+
+sgx_status_t sgx_ocall(const unsigned int index, void* ms);
+
 #ifdef __cplusplus
 }
 #endif

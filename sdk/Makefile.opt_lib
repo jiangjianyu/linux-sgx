@@ -73,11 +73,12 @@ opt_check_failed:
 
 
 .PHONY: all
-all: $(CHECK_OPT)
+all:
 	$(MAKE) components
 
 .PHONY: components
-components: tstdc tstdcxx tcxx tservice trts tcrypto tkey_exchange ukey_exchange tprotected_fs uprotected_fs ptrace sample_crypto simulation signtool edger8r tsetjmp tcmalloc
+# components: tstdc tstdcxx tcxx tservice trts tcrypto tkey_exchange ukey_exchange tprotected_fs uprotected_fs ptrace sample_crypto simulation signtool edger8r tsetjmp tcmalloc
+components: tstdc tstdcxx tcxx trts tcrypto
 
 # ---------------------------------------------------
 #  tstdc

@@ -3224,8 +3224,8 @@ static int init_mparams(void) {
 #if defined(WIN32) && !defined(_TLIBC_)
       magic = (size_t)(GetTickCount() ^ (size_t)0x55555555U);
 #elif defined(LACKS_TIME_H)
-      if (SGX_SUCCESS != sgx_read_rand((unsigned char *)&magic, sizeof(size_t)))
-          ABORT;
+      // if (SGX_SUCCESS != sgx_read_rand((unsigned char *)&magic, sizeof(size_t)))
+      //     ABORT;
       magic = (size_t)(magic ^ (size_t)0x55555555U);
 #else
       magic = (size_t)(time(0) ^ (size_t)0x55555555U);

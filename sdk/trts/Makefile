@@ -31,6 +31,12 @@
 
 include ../../buildenv.mk
 
+CFLAGS += -Werror $(ENCLAVE_CFLAGS)          \
+          -I$(LINUX_SDK_DIR)/trts            \
+          -I$(COMMON_DIR)/inc                \
+          -I$(COMMON_DIR)/inc/internal       \
+          -I$(COMMON_DIR)/inc/internal/linux
+
 CPPFLAGS += -I$(COMMON_DIR)/inc          \
             -I$(COMMON_DIR)/inc/internal \
             -I$(COMMON_DIR)/inc/tlibc
@@ -42,33 +48,32 @@ CXXFLAGS += $(ENCLAVE_CXXFLAGS) \
 
 TCXXFLAGS := $(filter-out -fstack-protector-strong, $(CXXFLAGS))
 
-OBJS1 := init_enclave.o  \
-        trts.o           \
-        trts_ecall.o     \
-        trts_ocall.o     \
-        trts_util.o      \
-        trts_veh.o       \
-        trts_xsave.o     \
-        init_optimized_lib.o \
-        trts_version.o
+ASM_SRCS  := $(wildcard cpu/x86/*.S)
 
-OBJS2 := trts_nsp.o
+OBJS :=     trts_util.o  \
+            trts.o \
+            global_init.o
 
-OBJS := $(OBJS1) $(OBJS2)
+OBJS      += $(ASM_SRCS:.S=.o)
 
-all: $(OBJS) elf_parser
+LIBTRTS = libsgx_trts.a
 
-$(OBJS1): %.o: %.cpp
+all: $(LIBTRTS)
+
+%.o: %.S
+	$(CC) $(CFLAGS) $(TCFLAGS) -c $< -o $@
+
+%.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -fPIC $< -o $@
 
-$(OBJS2): %.o: %.cpp
-	$(CXX) -c $(TCXXFLAGS) $(CPPFLAGS) -fPIC $< -o $@
+.PHONY: all
+all: $(LIBTRTS) | $(BUILD_DIR)
+	$(CP) $(LIBTRTS) $|
 
-.PHONY: elf_parser
-elf_parser:
-	$(MAKE) -C linux
+$(LIBTRTS): $(OBJS)
+	$(AR) rsD $@ $(OBJS) 
 
-.PHONY: clean
+.PHONY: clean all
 clean:
 	@$(RM) $(OBJS) *.bak *~
 	$(MAKE) -C linux clean

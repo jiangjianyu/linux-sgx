@@ -44,8 +44,8 @@ CPPFLAGS += -I.                          \
             -I./gdtoa
 
 ifneq ($(USE_OPT_LIBS), 0)
-CFLAGS += -D_TLIBC_USE_INTEL_FAST_STRING_
-CXXFLAGS += -D_TLIBC_USE_INTEL_FAST_STRING_
+# CFLAGS += -D_TLIBC_USE_INTEL_FAST_STRING_
+# CXXFLAGS += -D_TLIBC_USE_INTEL_FAST_STRING_
 LIBC_C_SRCS := $(wildcard gen/*.c gdtoa/*.c locale/*.c math/*.c stdlib/*.c string/*.c stdio/*.c time/*.c) 
 else
 LIBC_C_SRCS := $(wildcard gen/*.c gdtoa/*.c locale/*.c stdlib/*.c string/*.c stdio/*.c time/*.c)

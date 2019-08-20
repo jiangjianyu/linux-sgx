@@ -46,8 +46,6 @@ size_t get_heap_size(void);
 int * get_errno_addr(void);
 bool is_stack_addr(void *address, size_t size);
 bool is_valid_sp(uintptr_t sp);
-void* get_function(const char*);
-void* get_function_from(const void*, const char*);
 
 #ifdef __cplusplus
 }

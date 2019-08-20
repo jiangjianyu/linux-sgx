@@ -31,7 +31,6 @@
 
 
 #include "sgx_tcrypto.h"
-#include "ippcp.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -53,84 +52,15 @@ sgx_status_t sgx_rijndael128GCM_encrypt(const sgx_aes_gcm_128bit_key_t *p_key, c
                                         uint8_t *p_dst, const uint8_t *p_iv, uint32_t iv_len, const uint8_t *p_aad, uint32_t aad_len,
                                         sgx_aes_gcm_128bit_tag_t *p_out_mac)
 {
-    IppStatus error_code = ippStsNoErr;
-    IppsAES_GCMState* pState = NULL;
-    int ippStateSize = 0;
-
-    if ((p_key == NULL) || ((src_len > 0) && (p_dst == NULL)) || ((src_len > 0) && (p_src == NULL))
-        || (p_out_mac == NULL) || (iv_len != SGX_AESGCM_IV_SIZE) || ((aad_len > 0) && (p_aad == NULL))
-        || (p_iv == NULL) || ((p_src == NULL) && (p_aad == NULL)))
-    {
-        return SGX_ERROR_INVALID_PARAMETER;
-    }
-    error_code = ippsAES_GCMGetSize(&ippStateSize);
-    if (error_code != ippStsNoErr)
-    {
-        return SGX_ERROR_UNEXPECTED;
-    }
-    pState = (IppsAES_GCMState*)malloc(ippStateSize);
-    if (pState == NULL)
-    {
-        return SGX_ERROR_OUT_OF_MEMORY;
-    }
-    error_code = ippsAES_GCMInit((const Ipp8u *)p_key, SGX_AESGCM_KEY_SIZE, pState, ippStateSize);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(pState, ippStateSize, 0, ippStateSize);
-        free(pState);
-        switch (error_code)
-        {
-        case ippStsMemAllocErr: return SGX_ERROR_OUT_OF_MEMORY;
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    error_code = ippsAES_GCMStart(p_iv, SGX_AESGCM_IV_SIZE, p_aad, aad_len, pState);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(pState, ippStateSize, 0, ippStateSize);
-        free(pState);
-        switch (error_code)
-        {
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    if (src_len > 0) {
-        error_code = ippsAES_GCMEncrypt(p_src, p_dst, src_len, pState);
-        if (error_code != ippStsNoErr)
-        {
-            // Clear temp State before free.
-            memset_s(pState, ippStateSize, 0, ippStateSize);
-            free(pState);
-            switch (error_code)
-            {
-            case ippStsNullPtrErr: return SGX_ERROR_INVALID_PARAMETER;
-            default: return SGX_ERROR_UNEXPECTED;
-            }
-        }
-    }
-    error_code = ippsAES_GCMGetTag((Ipp8u *)p_out_mac, SGX_AESGCM_MAC_SIZE, pState);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(p_dst, src_len, 0, src_len);
-        memset_s(pState, ippStateSize, 0, ippStateSize);
-        free(pState);
-        switch (error_code)
-        {
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    // Clear temp State before free.
-    memset_s(pState, ippStateSize, 0, ippStateSize);
-    free(pState);
+    (void) p_key;
+    (void) p_src;
+    (void) src_len;
+    (void) p_iv;
+    (void) iv_len;
+    (void) p_aad;
+    (void) aad_len;
+    (void) p_dst;
+    (void) p_out_mac;
     return SGX_SUCCESS;
 }
 
@@ -138,98 +68,15 @@ sgx_status_t sgx_rijndael128GCM_decrypt(const sgx_aes_gcm_128bit_key_t *p_key, c
                                         uint32_t src_len, uint8_t *p_dst, const uint8_t *p_iv, uint32_t iv_len,
                                         const uint8_t *p_aad, uint32_t aad_len, const sgx_aes_gcm_128bit_tag_t *p_in_mac)
 {
-    IppStatus error_code = ippStsNoErr;
-    uint8_t l_tag[SGX_AESGCM_MAC_SIZE];
-    IppsAES_GCMState* pState = NULL;
-    int ippStateSize = 0;
-
-    if ((p_key == NULL) || ((src_len > 0) && (p_dst == NULL)) || ((src_len > 0) && (p_src == NULL))
-        || (p_in_mac == NULL) || (iv_len != SGX_AESGCM_IV_SIZE) || ((aad_len > 0) && (p_aad == NULL))
-        || (p_iv == NULL) || ((p_src == NULL) && (p_aad == NULL)))
-    {
-        return SGX_ERROR_INVALID_PARAMETER;
-    }
-
-    // Autenthication Tag returned by Decrypt to be compared with Tag created during seal
-    memset(&l_tag, 0, SGX_AESGCM_MAC_SIZE);
-    error_code = ippsAES_GCMGetSize(&ippStateSize);
-    if (error_code != ippStsNoErr)
-    {
-        return SGX_ERROR_UNEXPECTED;
-    }
-    pState = (IppsAES_GCMState*)malloc(ippStateSize);
-    if (pState == NULL)
-    {
-        return SGX_ERROR_OUT_OF_MEMORY;
-    }
-    error_code = ippsAES_GCMInit((const Ipp8u *)p_key, SGX_AESGCM_KEY_SIZE, pState, ippStateSize);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(pState, ippStateSize, 0, ippStateSize);
-        free(pState);
-        switch (error_code)
-        {
-        case ippStsMemAllocErr: return SGX_ERROR_OUT_OF_MEMORY;
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    error_code = ippsAES_GCMStart(p_iv, SGX_AESGCM_IV_SIZE, p_aad, aad_len, pState);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(pState, ippStateSize, 0, ippStateSize);
-        free(pState);
-        switch (error_code)
-        {
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    if (src_len > 0) {
-        error_code = ippsAES_GCMDecrypt(p_src, p_dst, src_len, pState);
-        if (error_code != ippStsNoErr)
-        {
-            // Clear temp State before free.
-            memset_s(pState, ippStateSize, 0, ippStateSize);
-            free(pState);
-            switch (error_code)
-            {
-            case ippStsNullPtrErr: return SGX_ERROR_INVALID_PARAMETER;
-            default: return SGX_ERROR_UNEXPECTED;
-            }
-        }
-    }
-    error_code = ippsAES_GCMGetTag((Ipp8u *)l_tag, SGX_AESGCM_MAC_SIZE, pState);
-    if (error_code != ippStsNoErr)
-    {
-        // Clear temp State before free.
-        memset_s(p_dst, src_len, 0, src_len);
-        memset_s(pState, ippStateSize, 0, ippStateSize);
-        free(pState);
-        switch (error_code)
-        {
-        case ippStsNullPtrErr:
-        case ippStsLengthErr: return SGX_ERROR_INVALID_PARAMETER;
-        default: return SGX_ERROR_UNEXPECTED;
-        }
-    }
-    // Clear temp State before free.
-    memset_s(pState, ippStateSize, 0, ippStateSize);
-    free(pState);
-
-    // Verify current data tag = data tag generated when sealing the data blob
-    if (consttime_memequal(p_in_mac, &l_tag, SGX_AESGCM_MAC_SIZE) == 0)
-    {
-        memset_s(p_dst, src_len, 0, src_len);
-        memset_s(&l_tag, SGX_AESGCM_MAC_SIZE, 0, SGX_AESGCM_MAC_SIZE);
-        return SGX_ERROR_MAC_MISMATCH;
-    }
-
-    memset_s(&l_tag, SGX_AESGCM_MAC_SIZE, 0, SGX_AESGCM_MAC_SIZE);
+    (void) p_key;
+    (void) p_src;
+    (void) src_len;
+    (void) p_iv;
+    (void) iv_len;
+    (void) p_aad;
+    (void) aad_len;
+    (void) p_dst;
+    (void) p_in_mac;
     return SGX_SUCCESS;
 }
 

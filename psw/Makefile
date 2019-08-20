@@ -38,22 +38,14 @@
 # 
 include ../buildenv.mk
 
-.PHONY: all uae_service urts AE clean rebuild
+.PHONY: all urts
 
-all: uae_service urts AE
+all: urts
 
-urts: uae_service
+urts: 
 	$(MAKE) -C urts/linux/
 
-uae_service:
-	$(MAKE) -C uae_service/linux/
-
-AE: urts
-	$(MAKE) -C ae/
-
 clean:
-	$(MAKE) -C ae/                 clean
-	$(MAKE) -C uae_service/linux/  clean
 	$(MAKE) -C urts/linux          clean
 
 rebuild:
