@@ -15,7 +15,7 @@
 
     unordered_map synopsis
 
-#include <initializer_list>
+#include <initializer>
 
 namespace std
 {
@@ -66,7 +66,7 @@ public:
             is_nothrow_move_constructible<key_equal>::value &&
             is_nothrow_move_constructible<allocator_type>::value);
     unordered_map(unordered_map&&, const Allocator&);
-    unordered_map(initializer_list<value_type>, size_type n = 0,
+    unordered_map(initializer<value_type>, size_type n = 0,
                   const hasher& hf = hasher(), const key_equal& eql = key_equal(),
                   const allocator_type& a = allocator_type());
     unordered_map(size_type n, const allocator_type& a)
@@ -80,9 +80,9 @@ public:
       unordered_map(InputIterator f, InputIterator l, size_type n, const hasher& hf, 
         const allocator_type& a)
       : unordered_map(f, l, n, hf, key_equal(), a) {}  // C++14
-    unordered_map(initializer_list<value_type> il, size_type n, const allocator_type& a)
+    unordered_map(initializer<value_type> il, size_type n, const allocator_type& a)
       : unordered_map(il, n, hasher(), key_equal(), a) {}  // C++14
-    unordered_map(initializer_list<value_type> il, size_type n, const hasher& hf, 
+    unordered_map(initializer<value_type> il, size_type n, const hasher& hf, 
       const allocator_type& a)
       : unordered_map(il, n, hf, key_equal(), a) {}  // C++14
     ~unordered_map();
@@ -93,7 +93,7 @@ public:
             is_nothrow_move_assignable<allocator_type>::value &&
             is_nothrow_move_assignable<hasher>::value &&
             is_nothrow_move_assignable<key_equal>::value);
-    unordered_map& operator=(initializer_list<value_type>);
+    unordered_map& operator=(initializer<value_type>);
 
     allocator_type get_allocator() const noexcept;
 
@@ -120,7 +120,7 @@ public:
         iterator insert(const_iterator hint, P&& obj);
     template <class InputIterator>
         void insert(InputIterator first, InputIterator last);
-    void insert(initializer_list<value_type>);
+    void insert(initializer<value_type>);
 
     template <class... Args>
         pair<iterator, bool> try_emplace(const key_type& k, Args&&... args);          // C++17
@@ -248,7 +248,7 @@ public:
             is_nothrow_move_constructible<key_equal>::value &&
             is_nothrow_move_constructible<allocator_type>::value);
     unordered_multimap(unordered_multimap&&, const Allocator&);
-    unordered_multimap(initializer_list<value_type>, size_type n = 0,
+    unordered_multimap(initializer<value_type>, size_type n = 0,
                   const hasher& hf = hasher(), const key_equal& eql = key_equal(),
                   const allocator_type& a = allocator_type());
     unordered_multimap(size_type n, const allocator_type& a)
@@ -262,9 +262,9 @@ public:
       unordered_multimap(InputIterator f, InputIterator l, size_type n, const hasher& hf, 
         const allocator_type& a)
       : unordered_multimap(f, l, n, hf, key_equal(), a) {}  // C++14
-    unordered_multimap(initializer_list<value_type> il, size_type n, const allocator_type& a)
+    unordered_multimap(initializer<value_type> il, size_type n, const allocator_type& a)
       : unordered_multimap(il, n, hasher(), key_equal(), a) {}  // C++14
-    unordered_multimap(initializer_list<value_type> il, size_type n, const hasher& hf, 
+    unordered_multimap(initializer<value_type> il, size_type n, const hasher& hf, 
       const allocator_type& a)
       : unordered_multimap(il, n, hf, key_equal(), a) {}  // C++14
     ~unordered_multimap();
@@ -275,7 +275,7 @@ public:
             is_nothrow_move_assignable<allocator_type>::value &&
             is_nothrow_move_assignable<hasher>::value &&
             is_nothrow_move_assignable<key_equal>::value);
-    unordered_multimap& operator=(initializer_list<value_type>);
+    unordered_multimap& operator=(initializer<value_type>);
 
     allocator_type get_allocator() const noexcept;
 
@@ -302,7 +302,7 @@ public:
         iterator insert(const_iterator hint, P&& obj);
     template <class InputIterator>
         void insert(InputIterator first, InputIterator last);
-    void insert(initializer_list<value_type>);
+    void insert(initializer<value_type>);
 
     iterator erase(const_iterator position);
     iterator erase(iterator position);  // C++14
@@ -830,10 +830,10 @@ public:
     unordered_map(unordered_map&& __u, const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_RVALUE_REFERENCES
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
-    unordered_map(initializer_list<value_type> __il);
-    unordered_map(initializer_list<value_type> __il, size_type __n,
+    unordered_map(initializer<value_type> __il);
+    unordered_map(initializer<value_type> __il, size_type __n,
                   const hasher& __hf = hasher(), const key_equal& __eql = key_equal());
-    unordered_map(initializer_list<value_type> __il, size_type __n,
+    unordered_map(initializer<value_type> __il, size_type __n,
                   const hasher& __hf, const key_equal& __eql,
                   const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
@@ -854,10 +854,10 @@ public:
         const allocator_type& __a)
       : unordered_map(__first, __last, __n, __hf, key_equal(), __a) {}
     _LIBCPP_INLINE_VISIBILITY
-    unordered_map(initializer_list<value_type> __il, size_type __n, const allocator_type& __a)
+    unordered_map(initializer<value_type> __il, size_type __n, const allocator_type& __a)
       : unordered_map(__il, __n, hasher(), key_equal(), __a) {}
     _LIBCPP_INLINE_VISIBILITY
-    unordered_map(initializer_list<value_type> __il, size_type __n, const hasher& __hf, 
+    unordered_map(initializer<value_type> __il, size_type __n, const hasher& __hf, 
       const allocator_type& __a)
       : unordered_map(__il, __n, __hf, key_equal(), __a) {}
 #endif
@@ -886,7 +886,7 @@ public:
 #endif
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    unordered_map& operator=(initializer_list<value_type> __il);
+    unordered_map& operator=(initializer<value_type> __il);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
@@ -932,7 +932,7 @@ public:
 
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    void insert(initializer_list<value_type> __il)
+    void insert(initializer<value_type> __il)
         {insert(__il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
@@ -1310,7 +1310,7 @@ unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_map(
 
 template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_map(
-        initializer_list<value_type> __il)
+        initializer<value_type> __il)
 {
 #if _LIBCPP_DEBUG_LEVEL >= 2
     __get_db()->__insert_c(this);
@@ -1320,7 +1320,7 @@ unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_map(
 
 template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_map(
-        initializer_list<value_type> __il, size_type __n, const hasher& __hf,
+        initializer<value_type> __il, size_type __n, const hasher& __hf,
         const key_equal& __eql)
     : __table_(__hf, __eql)
 {
@@ -1333,7 +1333,7 @@ unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_map(
 
 template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_map(
-        initializer_list<value_type> __il, size_type __n, const hasher& __hf,
+        initializer<value_type> __il, size_type __n, const hasher& __hf,
         const key_equal& __eql, const allocator_type& __a)
     : __table_(__hf, __eql, typename __table::allocator_type(__a))
 {
@@ -1366,7 +1366,7 @@ template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 inline
 unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>&
 unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>::operator=(
-        initializer_list<value_type> __il)
+        initializer<value_type> __il)
 {
     __table_.__assign_unique(__il.begin(), __il.end());
     return *this;
@@ -1583,11 +1583,11 @@ public:
     unordered_multimap(unordered_multimap&& __u, const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_RVALUE_REFERENCES
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
-    unordered_multimap(initializer_list<value_type> __il);
-    unordered_multimap(initializer_list<value_type> __il, size_type __n,
+    unordered_multimap(initializer<value_type> __il);
+    unordered_multimap(initializer<value_type> __il, size_type __n,
                        const hasher& __hf = hasher(),
                        const key_equal& __eql = key_equal());
-    unordered_multimap(initializer_list<value_type> __il, size_type __n,
+    unordered_multimap(initializer<value_type> __il, size_type __n,
                        const hasher& __hf, const key_equal& __eql,
                        const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
@@ -1608,10 +1608,10 @@ public:
         const allocator_type& __a)
       : unordered_multimap(__first, __last, __n, __hf, key_equal(), __a) {}
     _LIBCPP_INLINE_VISIBILITY
-    unordered_multimap(initializer_list<value_type> __il, size_type __n, const allocator_type& __a)
+    unordered_multimap(initializer<value_type> __il, size_type __n, const allocator_type& __a)
       : unordered_multimap(__il, __n, hasher(), key_equal(), __a) {}
     _LIBCPP_INLINE_VISIBILITY
-    unordered_multimap(initializer_list<value_type> __il, size_type __n, const hasher& __hf, 
+    unordered_multimap(initializer<value_type> __il, size_type __n, const hasher& __hf, 
       const allocator_type& __a)
       : unordered_multimap(__il, __n, __hf, key_equal(), __a) {}
 #endif
@@ -1640,7 +1640,7 @@ public:
 #endif
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    unordered_multimap& operator=(initializer_list<value_type> __il);
+    unordered_multimap& operator=(initializer<value_type> __il);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
@@ -1680,7 +1680,7 @@ public:
 
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    void insert(initializer_list<value_type> __il)
+    void insert(initializer<value_type> __il)
         {insert(__il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
@@ -1947,7 +1947,7 @@ unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_multimap(
 
 template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_multimap(
-        initializer_list<value_type> __il)
+        initializer<value_type> __il)
 {
 #if _LIBCPP_DEBUG_LEVEL >= 2
     __get_db()->__insert_c(this);
@@ -1957,7 +1957,7 @@ unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_multimap(
 
 template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_multimap(
-        initializer_list<value_type> __il, size_type __n, const hasher& __hf,
+        initializer<value_type> __il, size_type __n, const hasher& __hf,
         const key_equal& __eql)
     : __table_(__hf, __eql)
 {
@@ -1970,7 +1970,7 @@ unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_multimap(
 
 template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>::unordered_multimap(
-        initializer_list<value_type> __il, size_type __n, const hasher& __hf,
+        initializer<value_type> __il, size_type __n, const hasher& __hf,
         const key_equal& __eql, const allocator_type& __a)
     : __table_(__hf, __eql, typename __table::allocator_type(__a))
 {
@@ -2003,7 +2003,7 @@ template <class _Key, class _Tp, class _Hash, class _Pred, class _Alloc>
 inline
 unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>&
 unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>::operator=(
-        initializer_list<value_type> __il)
+        initializer<value_type> __il)
 {
     __table_.__assign_multi(__il.begin(), __il.end());
     return *this;

@@ -45,6 +45,8 @@ static inline int _InterlockedExchange(int volatile * dst, int val)
 {
     int res;
 
+    #if defined(__x86_64__)
+
     __asm __volatile(
         "lock xchg %2, %1;"
         "mov %2, %0"
@@ -53,6 +55,9 @@ static inline int _InterlockedExchange(int volatile * dst, int val)
         "r" (val) 
         : "memory"
     );
+    #elif defined (__arm__)
+
+    #endif
 
     return (res);
    

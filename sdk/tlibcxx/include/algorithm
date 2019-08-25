@@ -14,7 +14,7 @@
 /*
     algorithm synopsis
 
-#include <initializer_list>
+#include <initializer>
 
 namespace std
 {
@@ -537,11 +537,11 @@ template <class T, class Compare>
 
 template<class T>
     T
-    min(initializer_list<T> t);  // constexpr in C++14
+    min(initializer<T> t);  // constexpr in C++14
 
 template<class T, class Compare>
     T
-    min(initializer_list<T> t, Compare comp);  // constexpr in C++14
+    min(initializer<T> t, Compare comp);  // constexpr in C++14
 
 template<class T>
     constexpr const T& clamp( const T& v, const T& lo, const T& hi );               // C++17
@@ -567,11 +567,11 @@ template <class T, class Compare>
 
 template<class T>
     T
-    max(initializer_list<T> t);  // constexpr in C++14
+    max(initializer<T> t);  // constexpr in C++14
 
 template<class T, class Compare>
     T
-    max(initializer_list<T> t, Compare comp);  // constexpr in C++14
+    max(initializer<T> t, Compare comp);  // constexpr in C++14
 
 template<class ForwardIterator>
     pair<ForwardIterator, ForwardIterator>
@@ -591,11 +591,11 @@ template<class T, class Compare>
 
 template<class T>
     pair<T, T>
-    minmax(initializer_list<T> t);  // constexpr in C++14
+    minmax(initializer<T> t);  // constexpr in C++14
 
 template<class T, class Compare>
     pair<T, T>
-    minmax(initializer_list<T> t, Compare comp);  // constexpr in C++14
+    minmax(initializer<T> t, Compare comp);  // constexpr in C++14
 
 template <class InputIterator1, class InputIterator2>
     bool
@@ -627,7 +627,7 @@ template <class BidirectionalIterator, class Compare>
 */
 
 #include <__config>
-#include <initializer_list>
+#include <initializer>
 #include <type_traits>
 #include <cstring>
 #include <utility> // needed to provide swap_ranges.
@@ -2585,7 +2585,7 @@ min(const _Tp& __a, const _Tp& __b)
 template<class _Tp, class _Compare>
 inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX11
 _Tp
-min(initializer_list<_Tp> __t, _Compare __comp)
+min(initializer<_Tp> __t, _Compare __comp)
 {
     return *_VSTD::min_element(__t.begin(), __t.end(), __comp);
 }
@@ -2593,7 +2593,7 @@ min(initializer_list<_Tp> __t, _Compare __comp)
 template<class _Tp>
 inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX11
 _Tp
-min(initializer_list<_Tp> __t)
+min(initializer<_Tp> __t)
 {
     return *_VSTD::min_element(__t.begin(), __t.end(), __less<_Tp>());
 }
@@ -2650,7 +2650,7 @@ max(const _Tp& __a, const _Tp& __b)
 template<class _Tp, class _Compare>
 inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX11
 _Tp
-max(initializer_list<_Tp> __t, _Compare __comp)
+max(initializer<_Tp> __t, _Compare __comp)
 {
     return *_VSTD::max_element(__t.begin(), __t.end(), __comp);
 }
@@ -2658,7 +2658,7 @@ max(initializer_list<_Tp> __t, _Compare __comp)
 template<class _Tp>
 inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX11
 _Tp
-max(initializer_list<_Tp> __t)
+max(initializer<_Tp> __t)
 {
     return *_VSTD::max_element(__t.begin(), __t.end(), __less<_Tp>());
 }
@@ -2769,9 +2769,9 @@ minmax(const _Tp& __a, const _Tp& __b)
 template<class _Tp, class _Compare>
 inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX11
 pair<_Tp, _Tp>
-minmax(initializer_list<_Tp> __t, _Compare __comp)
+minmax(initializer<_Tp> __t, _Compare __comp)
 {
-    typedef typename initializer_list<_Tp>::const_iterator _Iter;
+    typedef typename initializer<_Tp>::const_iterator _Iter;
     _Iter __first = __t.begin();
     _Iter __last  = __t.end();
     std::pair<_Tp, _Tp> __result(*__first, *__first);
@@ -2806,7 +2806,7 @@ minmax(initializer_list<_Tp> __t, _Compare __comp)
 template<class _Tp>
 inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX11
 pair<_Tp, _Tp>
-minmax(initializer_list<_Tp> __t)
+minmax(initializer<_Tp> __t)
 {
     return _VSTD::minmax(__t, __less<_Tp>());
 }

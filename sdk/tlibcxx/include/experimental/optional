@@ -93,7 +93,7 @@ namespace std { namespace experimental { inline namespace fundamentals_v1 {
 	  constexpr optional(T&&);
 	  template <class... Args> constexpr explicit optional(in_place_t, Args&&...);
 	  template <class U, class... Args>
-		constexpr explicit optional(in_place_t, initializer_list<U>, Args&&...);
+		constexpr explicit optional(in_place_t, initializer<U>, Args&&...);
 
 	  // 5.3.2, Destructor
 	  ~optional();
@@ -105,7 +105,7 @@ namespace std { namespace experimental { inline namespace fundamentals_v1 {
 	  template <class U> optional& operator=(U&&);
 	  template <class... Args> void emplace(Args&&...);
 	  template <class U, class... Args>
-		void emplace(initializer_list<U>, Args&&...);
+		void emplace(initializer<U>, Args&&...);
 
 	  // 5.3.4, Swap
 	  void swap(optional&) noexcept(see below);
@@ -160,7 +160,7 @@ _LIBCPP_END_NAMESPACE_EXPERIMENTAL
 
 #if _LIBCPP_STD_VER > 11
 
-#include <initializer_list>
+#include <initializer>
 #include <type_traits>
 #include <new>
 #include <__functional_base>
@@ -335,12 +335,12 @@ public:
     template <class _Up, class... _Args,
               class = typename enable_if
                       <
-                           is_constructible<value_type, initializer_list<_Up>&, _Args...>::value
+                           is_constructible<value_type, initializer<_Up>&, _Args...>::value
                       >::type
              >
     _LIBCPP_INLINE_VISIBILITY
     constexpr
-    explicit optional(in_place_t, initializer_list<_Up> __il, _Args&&... __args)
+    explicit optional(in_place_t, initializer<_Up> __il, _Args&&... __args)
         : __base(in_place, __il, _VSTD::forward<_Args>(__args)...) {}
 
     _LIBCPP_INLINE_VISIBILITY
@@ -436,12 +436,12 @@ public:
     template <class _Up, class... _Args,
               class = typename enable_if
                       <
-                          is_constructible<value_type, initializer_list<_Up>&, _Args...>::value
+                          is_constructible<value_type, initializer<_Up>&, _Args...>::value
                       >::type
              >
     _LIBCPP_INLINE_VISIBILITY
     void
-    emplace(initializer_list<_Up> __il, _Args&&... __args)
+    emplace(initializer<_Up> __il, _Args&&... __args)
     {
         *this = nullopt;
         ::new(_VSTD::addressof(this->__val_)) value_type(__il, _VSTD::forward<_Args>(__args)...);

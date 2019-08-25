@@ -57,8 +57,8 @@ else
 libcrypto_px:
 	$(MAKE) -C $(SGX_IPP_DIR)
 
-$(TARGET): $(OBJ) libcrypto_px
-	@$(CP) $(SGX_IPP_DIR)/libcrypto_px.a $@
+$(TARGET): $(OBJ)
+	# @$(CP) $(SGX_IPP_DIR)/libcrypto_px.a $@
 	$(AR) rsD $@ $(OBJ)
 endif
 

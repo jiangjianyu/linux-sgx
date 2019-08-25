@@ -50,8 +50,8 @@ public:
     forward_list(forward_list&& x)
         noexcept(is_nothrow_move_constructible<allocator_type>::value);
     forward_list(forward_list&& x, const allocator_type& a);
-    forward_list(initializer_list<value_type> il);
-    forward_list(initializer_list<value_type> il, const allocator_type& a);
+    forward_list(initializer<value_type> il);
+    forward_list(initializer<value_type> il, const allocator_type& a);
 
     ~forward_list();
 
@@ -60,12 +60,12 @@ public:
         noexcept(
              allocator_type::propagate_on_container_move_assignment::value &&
              is_nothrow_move_assignable<allocator_type>::value);
-    forward_list& operator=(initializer_list<value_type> il);
+    forward_list& operator=(initializer<value_type> il);
 
     template <class InputIterator>
         void assign(InputIterator first, InputIterator last);
     void assign(size_type n, const value_type& v);
-    void assign(initializer_list<value_type> il);
+    void assign(initializer<value_type> il);
 
     allocator_type get_allocator() const noexcept;
 
@@ -101,7 +101,7 @@ public:
     template <class InputIterator>
         iterator insert_after(const_iterator p,
                               InputIterator first, InputIterator last);
-    iterator insert_after(const_iterator p, initializer_list<value_type> il);
+    iterator insert_after(const_iterator p, initializer<value_type> il);
 
     iterator erase_after(const_iterator p);
     iterator erase_after(const_iterator first, const_iterator last);
@@ -168,7 +168,7 @@ template <class T, class Allocator>
 
 #include <__config>
 
-#include <initializer_list>
+#include <initializer>
 #include <memory>
 #include <limits>
 #include <iterator>
@@ -664,8 +664,8 @@ public:
     forward_list(forward_list&& __x, const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_RVALUE_REFERENCES
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
-    forward_list(initializer_list<value_type> __il);
-    forward_list(initializer_list<value_type> __il, const allocator_type& __a);
+    forward_list(initializer<value_type> __il);
+    forward_list(initializer<value_type> __il, const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     // ~forward_list() = default;
@@ -680,7 +680,7 @@ public:
 #endif
 #ifndef  _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    forward_list& operator=(initializer_list<value_type> __il);
+    forward_list& operator=(initializer<value_type> __il);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     template <class _InputIterator>
@@ -693,7 +693,7 @@ public:
     void assign(size_type __n, const value_type& __v);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    void assign(initializer_list<value_type> __il);
+    void assign(initializer<value_type> __il);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
@@ -770,7 +770,7 @@ public:
         >::type
         insert_after(const_iterator __p, _InputIterator __f, _InputIterator __l);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
-    iterator insert_after(const_iterator __p, initializer_list<value_type> __il)
+    iterator insert_after(const_iterator __p, initializer<value_type> __il)
         {return insert_after(__p, __il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
@@ -966,13 +966,13 @@ forward_list<_Tp, _Alloc>::forward_list(forward_list&& __x,
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
 template <class _Tp, class _Alloc>
-forward_list<_Tp, _Alloc>::forward_list(initializer_list<value_type> __il)
+forward_list<_Tp, _Alloc>::forward_list(initializer<value_type> __il)
 {
     insert_after(cbefore_begin(), __il.begin(), __il.end());
 }
 
 template <class _Tp, class _Alloc>
-forward_list<_Tp, _Alloc>::forward_list(initializer_list<value_type> __il,
+forward_list<_Tp, _Alloc>::forward_list(initializer<value_type> __il,
                                         const allocator_type& __a)
     : base(__a)
 {
@@ -1039,7 +1039,7 @@ forward_list<_Tp, _Alloc>::operator=(forward_list&& __x)
 template <class _Tp, class _Alloc>
 inline
 forward_list<_Tp, _Alloc>&
-forward_list<_Tp, _Alloc>::operator=(initializer_list<value_type> __il)
+forward_list<_Tp, _Alloc>::operator=(initializer<value_type> __il)
 {
     assign(__il.begin(), __il.end());
     return *this;
@@ -1087,7 +1087,7 @@ forward_list<_Tp, _Alloc>::assign(size_type __n, const value_type& __v)
 template <class _Tp, class _Alloc>
 inline
 void
-forward_list<_Tp, _Alloc>::assign(initializer_list<value_type> __il)
+forward_list<_Tp, _Alloc>::assign(initializer<value_type> __il)
 {
     assign(__il.begin(), __il.end());
 }

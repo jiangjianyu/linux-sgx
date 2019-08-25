@@ -20,7 +20,7 @@ void * get_heap_base(void)
 
 size_t get_heap_size(void)
 {
-    return ((intptr_t)stack_base - (intptr_t)enclave_base);
+    return (size_t)((intptr_t)stack_base - (intptr_t)enclave_base);
 }
 
 __attribute__ ((visibility ("default")))

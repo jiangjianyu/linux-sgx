@@ -5,12 +5,12 @@ module std [system] {
   // use that to provide a 'strict mode' for libc++.
   module algorithm {
     header "algorithm"
-    export initializer_list
+    export initializer
     export *
   }
   module array {
     header "array"
-    export initializer_list
+    export initializer
     export *
   }
   module atomic {
@@ -253,7 +253,7 @@ module std [system] {
   }
   module deque {
     header "deque"
-    export initializer_list
+    export initializer
     export *
   }
   module exception {
@@ -262,7 +262,7 @@ module std [system] {
   }
   module forward_list {
     header "forward_list"
-    export initializer_list
+    export initializer
     export *
   }
   module fstream {
@@ -277,8 +277,8 @@ module std [system] {
     header "future"
     export *
   }
-  module initializer_list {
-    header "initializer_list"
+  module initializer {
+    header "initializer"
     export *
   }
   module iomanip {
@@ -317,7 +317,7 @@ module std [system] {
   }
   module list {
     header "list"
-    export initializer_list
+    export initializer
     export *
   }
   module locale {
@@ -326,7 +326,7 @@ module std [system] {
   }
   module map {
     header "map"
-    export initializer_list
+    export initializer
     export *
   }
   module memory {
@@ -352,12 +352,12 @@ module std [system] {
   }
   module queue {
     header "queue"
-    export initializer_list
+    export initializer
     export *
   }
   module random {
     header "random"
-    export initializer_list
+    export initializer
     export *
   }
   module ratio {
@@ -366,7 +366,7 @@ module std [system] {
   }
   module regex {
     header "regex"
-    export initializer_list
+    export initializer
     export *
   }
   module scoped_allocator {
@@ -375,7 +375,7 @@ module std [system] {
   }
   module set {
     header "set"
-    export initializer_list
+    export initializer
     export *
   }
   module sstream {
@@ -385,7 +385,7 @@ module std [system] {
   }
   module stack {
     header "stack"
-    export initializer_list
+    export initializer
     export *
   }
   module stdexcept {
@@ -398,7 +398,7 @@ module std [system] {
   }
   module string {
     header "string"
-    export initializer_list
+    export initializer
     export *
   }
   module strstream {
@@ -431,27 +431,27 @@ module std [system] {
   }
   module unordered_map {
     header "unordered_map"
-    export initializer_list
+    export initializer
     export *
   }
   module unordered_set {
     header "unordered_set"
-    export initializer_list
+    export initializer
     export *
   }
   module utility {
     header "utility"
-    export initializer_list
+    export initializer
     export *
   }
   module valarray {
     header "valarray"
-    export initializer_list
+    export initializer
     export *
   }
   module vector {
     header "vector"
-    export initializer_list
+    export initializer
     export *
   }
 

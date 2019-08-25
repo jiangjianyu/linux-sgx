@@ -29,7 +29,7 @@
 #
 #
 
-
+USE_OPT_LIBS := 0
 ifneq ($(USE_OPT_LIBS), 0)
 include Makefile.opt_lib
 else

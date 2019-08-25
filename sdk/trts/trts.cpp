@@ -30,4 +30,6 @@ thread_data_t *get_thread_data(void) {
     return &thread;
 }
 
+unsigned long __stack_chk_guard = 0xBAAAAAAD;
 }
+

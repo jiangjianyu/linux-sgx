@@ -42,26 +42,3 @@
 #define _ENTRY(x)   .text; _ALIGN_TEXT; .globl x; .type x,@function; x:
 #define ENTRY(y)    _ENTRY(_C_LABEL(y));
 
-ENTRY(alloca)
-#ifdef __i386__
-	popl	%edx		/*  pop return addr */
-	popl	%eax		/*  pop amount to allocate */
-	movl	%esp,%ecx
-	addl	$3,%eax		/*  round up to next word */
-	andl	$-4,%eax
-	subl	%eax,%esp
-	movl	%esp,%eax	/* base of newly allocated space */
-	pushl	8(%ecx)		/* copy possible saved registers */
-	pushl	4(%ecx)
-	pushl	0(%ecx)
-	pushl	%eax		/* dummy to pop at callsite */
-	jmp	*%edx		    /* "return" */
-#else /* __x86_64__ */
-	popq	%rdx
-	movq	%rsp,%rcx
-	addq	$15,%rdi	/*  round up to 16 bytes */
-	andq	$~15,%rdi
-	subq	%rdi,%rsp
-	movq	%rsp,%rax
-	jmp	*%rdx
-#endif

@@ -12,7 +12,7 @@
 #define _LIBCPP__HASH_TABLE
 
 #include <__config>
-#include <initializer_list>
+#include <initializer>
 #include <memory>
 #include <iterator>
 #include <algorithm>

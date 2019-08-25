@@ -34,13 +34,13 @@ public:
     valarray(const gslice_array<value_type>& ga);
     valarray(const mask_array<value_type>& ma);
     valarray(const indirect_array<value_type>& ia);
-    valarray(initializer_list<value_type> il);
+    valarray(initializer<value_type> il);
     ~valarray();
 
     // assignment:
     valarray& operator=(const valarray& v);
     valarray& operator=(valarray&& v) noexcept;
-    valarray& operator=(initializer_list<value_type> il);
+    valarray& operator=(initializer<value_type> il);
     valarray& operator=(const value_type& x);
     valarray& operator=(const slice_array<value_type>& sa);
     valarray& operator=(const gslice_array<value_type>& ga);
@@ -342,7 +342,7 @@ template <class T> unspecified2 end(const valarray<T>& v);
 #include <__config>
 #include <cstddef>
 #include <cmath>
-#include <initializer_list>
+#include <initializer>
 #include <algorithm>
 #include <functional>
 #include <new>
@@ -813,7 +813,7 @@ public:
     valarray(valarray&& __v) _NOEXCEPT;
 #endif  // _LIBCPP_HAS_NO_RVALUE_REFERENCES
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
-    valarray(initializer_list<value_type> __il);
+    valarray(initializer<value_type> __il);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     valarray(const slice_array<value_type>& __sa);
     valarray(const gslice_array<value_type>& __ga);
@@ -830,7 +830,7 @@ public:
 #endif  // _LIBCPP_HAS_NO_RVALUE_REFERENCES
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    valarray& operator=(initializer_list<value_type>);
+    valarray& operator=(initializer<value_type>);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
     valarray& operator=(const value_type& __x);
@@ -2831,7 +2831,7 @@ valarray<_Tp>::valarray(valarray&& __v) _NOEXCEPT
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
 template <class _Tp>
-valarray<_Tp>::valarray(initializer_list<value_type> __il)
+valarray<_Tp>::valarray(initializer<value_type> __il)
     : __begin_(0),
       __end_(0)
 {
@@ -3013,7 +3013,7 @@ valarray<_Tp>::operator=(valarray&& __v) _NOEXCEPT
 template <class _Tp>
 inline
 valarray<_Tp>&
-valarray<_Tp>::operator=(initializer_list<value_type> __il)
+valarray<_Tp>::operator=(initializer<value_type> __il)
 {
     if (size() != __il.size())
         resize(__il.size());

@@ -385,8 +385,8 @@ template <class C> auto rbegin(C& c) -> decltype(c.rbegin());                 //
 template <class C> auto rbegin(const C& c) -> decltype(c.rbegin());           // C++14
 template <class C> auto rend(C& c) -> decltype(c.rend());                     // C++14
 template <class C> auto rend(const C& c) -> decltype(c.rend());               // C++14
-template <class E> reverse_iterator<const E*> rbegin(initializer_list<E> il); // C++14
-template <class E> reverse_iterator<const E*> rend(initializer_list<E> il);   // C++14
+template <class E> reverse_iterator<const E*> rbegin(initializer<E> il); // C++14
+template <class E> reverse_iterator<const E*> rend(initializer<E> il);   // C++14
 template <class T, size_t N> reverse_iterator<T*> rbegin(T (&array)[N]);      // C++14
 template <class T, size_t N> reverse_iterator<T*> rend(T (&array)[N]);        // C++14
 template <class C> auto crbegin(const C& c) -> decltype(std::rbegin(c));      // C++14
@@ -397,11 +397,11 @@ template <class C> constexpr auto size(const C& c) -> decltype(c.size());       
 template <class T, size_t N> constexpr size_t size(const T (&array)[N]) noexcept; // C++17
 template <class C> constexpr auto empty(const C& c) -> decltype(c.empty());       // C++17
 template <class T, size_t N> constexpr bool empty(const T (&array)[N]) noexcept;  // C++17
-template <class E> constexpr bool empty(initializer_list<E> il) noexcept;         // C++17
+template <class E> constexpr bool empty(initializer<E> il) noexcept;         // C++17
 template <class C> constexpr auto data(C& c) -> decltype(c.data());               // C++17
 template <class C> constexpr auto data(const C& c) -> decltype(c.data());         // C++17
 template <class T, size_t N> constexpr T* data(T (&array)[N]) noexcept;           // C++17
-template <class E> constexpr const E* data(initializer_list<E> il) noexcept;      // C++17
+template <class E> constexpr const E* data(initializer<E> il) noexcept;      // C++17
 
 }  // std
 
@@ -412,7 +412,7 @@ template <class E> constexpr const E* data(initializer_list<E> il) noexcept;    
 #include <__functional_base>
 #include <type_traits>
 #include <cstddef>
-#include <initializer_list>
+#include <initializer>
 #ifdef __APPLE__
 #include <Availability.h>
 #endif
@@ -1630,14 +1630,14 @@ reverse_iterator<_Tp*> rend(_Tp (&__array)[_Np])
 
 template <class _Ep>
 inline _LIBCPP_INLINE_VISIBILITY
-reverse_iterator<const _Ep*> rbegin(initializer_list<_Ep> __il)
+reverse_iterator<const _Ep*> rbegin(initializer<_Ep> __il)
 {
     return reverse_iterator<const _Ep*>(__il.end());
 }
 
 template <class _Ep>
 inline _LIBCPP_INLINE_VISIBILITY
-reverse_iterator<const _Ep*> rend(initializer_list<_Ep> __il)
+reverse_iterator<const _Ep*> rend(initializer<_Ep> __il)
 {
     return reverse_iterator<const _Ep*>(__il.begin());
 }
@@ -1751,7 +1751,7 @@ template <class _Tp, size_t _Sz>
 constexpr bool empty(const _Tp (&__array)[_Sz]) noexcept { return false; }
 
 template <class _Ep>
-constexpr bool empty(initializer_list<_Ep> __il) noexcept { return __il.size() == 0; }
+constexpr bool empty(initializer<_Ep> __il) noexcept { return __il.size() == 0; }
 
 template <class _Cont> constexpr
 auto data(_Cont& __c) -> decltype(__c.data()) { return __c.data(); }
@@ -1763,7 +1763,7 @@ template <class _Tp, size_t _Sz>
 constexpr _Tp* data(_Tp (&__array)[_Sz]) noexcept { return __array; }
 
 template <class _Ep>
-constexpr const _Ep* data(initializer_list<_Ep> __il) noexcept { return __il.begin(); }
+constexpr const _Ep* data(initializer<_Ep> __il) noexcept { return __il.begin(); }
 #endif
 
 

@@ -52,8 +52,8 @@ public:
     list(list&& x)
         noexcept(is_nothrow_move_constructible<allocator_type>::value);
     list(list&&, const allocator_type& a);
-    list(initializer_list<value_type>);
-    list(initializer_list<value_type>, const allocator_type& a);
+    list(initializer<value_type>);
+    list(initializer<value_type>, const allocator_type& a);
 
     ~list();
 
@@ -62,11 +62,11 @@ public:
         noexcept(
              allocator_type::propagate_on_container_move_assignment::value &&
              is_nothrow_move_assignable<allocator_type>::value);
-    list& operator=(initializer_list<value_type>);
+    list& operator=(initializer<value_type>);
     template <class Iter>
         void assign(Iter first, Iter last);
     void assign(size_type n, const value_type& t);
-    void assign(initializer_list<value_type>);
+    void assign(initializer<value_type>);
 
     allocator_type get_allocator() const noexcept;
 
@@ -109,7 +109,7 @@ public:
     iterator insert(const_iterator position, size_type n, const value_type& x);
     template <class Iter>
         iterator insert(const_iterator position, Iter first, Iter last);
-    iterator insert(const_iterator position, initializer_list<value_type> il);
+    iterator insert(const_iterator position, initializer<value_type> il);
 
     iterator erase(const_iterator position);
     iterator erase(const_iterator position, const_iterator last);
@@ -172,7 +172,7 @@ template <class T, class Alloc>
 
 #include <memory>
 #include <limits>
-#include <initializer_list>
+#include <initializer>
 #include <iterator>
 #include <algorithm>
 #include <type_traits>
@@ -864,8 +864,8 @@ public:
     _LIBCPP_INLINE_VISIBILITY
     list& operator=(const list& __c);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
-    list(initializer_list<value_type> __il);
-    list(initializer_list<value_type> __il, const allocator_type& __a);
+    list(initializer<value_type> __il);
+    list(initializer<value_type> __il, const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 #ifndef _LIBCPP_HAS_NO_RVALUE_REFERENCES
     _LIBCPP_INLINE_VISIBILITY
@@ -881,7 +881,7 @@ public:
 #endif  // _LIBCPP_HAS_NO_RVALUE_REFERENCES
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    list& operator=(initializer_list<value_type> __il)
+    list& operator=(initializer<value_type> __il)
         {assign(__il.begin(), __il.end()); return *this;}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
@@ -891,7 +891,7 @@ public:
     void assign(size_type __n, const value_type& __x);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    void assign(initializer_list<value_type> __il)
+    void assign(initializer<value_type> __il)
         {assign(__il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
@@ -987,7 +987,7 @@ public:
              typename enable_if<__is_input_iterator<_InpIter>::value>::type* = 0);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    iterator insert(const_iterator __p, initializer_list<value_type> __il)
+    iterator insert(const_iterator __p, initializer<value_type> __il)
         {return insert(__p, __il.begin(), __il.end());}
 #endif   // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
@@ -1233,24 +1233,24 @@ list<_Tp, _Alloc>::list(const list& __c, const allocator_type& __a)
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
 template <class _Tp, class _Alloc>
-list<_Tp, _Alloc>::list(initializer_list<value_type> __il, const allocator_type& __a)
+list<_Tp, _Alloc>::list(initializer<value_type> __il, const allocator_type& __a)
     : base(__a)
 {
 #if _LIBCPP_DEBUG_LEVEL >= 2
     __get_db()->__insert_c(this);
 #endif
-    for (typename initializer_list<value_type>::const_iterator __i = __il.begin(),
+    for (typename initializer<value_type>::const_iterator __i = __il.begin(),
             __e = __il.end(); __i != __e; ++__i)
         push_back(*__i);
 }
 
 template <class _Tp, class _Alloc>
-list<_Tp, _Alloc>::list(initializer_list<value_type> __il)
+list<_Tp, _Alloc>::list(initializer<value_type> __il)
 {
 #if _LIBCPP_DEBUG_LEVEL >= 2
     __get_db()->__insert_c(this);
 #endif
-    for (typename initializer_list<value_type>::const_iterator __i = __il.begin(),
+    for (typename initializer<value_type>::const_iterator __i = __il.begin(),
             __e = __il.end(); __i != __e; ++__i)
         push_back(*__i);
 }

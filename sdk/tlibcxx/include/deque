@@ -51,7 +51,7 @@ public:
     deque(const deque& c);
     deque(deque&& c)
         noexcept(is_nothrow_move_constructible<allocator_type>::value);
-    deque(initializer_list<value_type> il, const Allocator& a = allocator_type());
+    deque(initializer<value_type> il, const Allocator& a = allocator_type());
     deque(const deque& c, const allocator_type& a);
     deque(deque&& c, const allocator_type& a);
     ~deque();
@@ -61,12 +61,12 @@ public:
         noexcept(
              allocator_type::propagate_on_container_move_assignment::value &&
              is_nothrow_move_assignable<allocator_type>::value);
-    deque& operator=(initializer_list<value_type> il);
+    deque& operator=(initializer<value_type> il);
 
     template <class InputIterator>
         void assign(InputIterator f, InputIterator l);
     void assign(size_type n, const value_type& v);
-    void assign(initializer_list<value_type> il);
+    void assign(initializer<value_type> il);
 
     allocator_type get_allocator() const noexcept;
 
@@ -118,7 +118,7 @@ public:
     iterator insert(const_iterator p, size_type n, const value_type& v);
     template <class InputIterator>
         iterator insert(const_iterator p, InputIterator f, InputIterator l);
-    iterator insert(const_iterator p, initializer_list<value_type> il);
+    iterator insert(const_iterator p, initializer<value_type> il);
     void pop_front();
     void pop_back();
     iterator erase(const_iterator p);
@@ -157,7 +157,7 @@ template <class T, class Allocator>
 #include <__config>
 #include <__split_buffer>
 #include <type_traits>
-#include <initializer_list>
+#include <initializer>
 #include <iterator>
 #include <algorithm>
 #include <stdexcept>
@@ -1235,14 +1235,14 @@ public:
     deque(const deque& __c);
     deque(const deque& __c, const allocator_type& __a);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
-    deque(initializer_list<value_type> __il);
-    deque(initializer_list<value_type> __il, const allocator_type& __a);
+    deque(initializer<value_type> __il);
+    deque(initializer<value_type> __il, const allocator_type& __a);
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     deque& operator=(const deque& __c);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    deque& operator=(initializer_list<value_type> __il) {assign(__il); return *this;}
+    deque& operator=(initializer<value_type> __il) {assign(__il); return *this;}
 #endif   // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
 #ifndef _LIBCPP_HAS_NO_RVALUE_REFERENCES
@@ -1266,7 +1266,7 @@ public:
     void assign(size_type __n, const value_type& __v);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    void assign(initializer_list<value_type> __il) {assign(__il.begin(), __il.end());}
+    void assign(initializer<value_type> __il) {assign(__il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
@@ -1367,7 +1367,7 @@ public:
                          typename enable_if<__is_bidirectional_iterator<_BiIter>::value>::type* = 0);
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    iterator insert(const_iterator __p, initializer_list<value_type> __il)
+    iterator insert(const_iterator __p, initializer<value_type> __il)
         {return insert(__p, __il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     void pop_front();
@@ -1527,13 +1527,13 @@ deque<_Tp, _Allocator>::deque(const deque& __c, const allocator_type& __a)
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
 template <class _Tp, class _Allocator>
-deque<_Tp, _Allocator>::deque(initializer_list<value_type> __il)
+deque<_Tp, _Allocator>::deque(initializer<value_type> __il)
 {
     __append(__il.begin(), __il.end());
 }
 
 template <class _Tp, class _Allocator>
-deque<_Tp, _Allocator>::deque(initializer_list<value_type> __il, const allocator_type& __a)
+deque<_Tp, _Allocator>::deque(initializer<value_type> __il, const allocator_type& __a)
     : __base(__a)
 {
     __append(__il.begin(), __il.end());

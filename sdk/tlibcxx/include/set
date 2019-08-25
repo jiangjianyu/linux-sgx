@@ -63,13 +63,13 @@ public:
     explicit set(const allocator_type& a);
     set(const set& s, const allocator_type& a);
     set(set&& s, const allocator_type& a);
-    set(initializer_list<value_type> il, const value_compare& comp = value_compare());
-    set(initializer_list<value_type> il, const value_compare& comp,
+    set(initializer<value_type> il, const value_compare& comp = value_compare());
+    set(initializer<value_type> il, const value_compare& comp,
         const allocator_type& a);
     template <class InputIterator>
         set(InputIterator first, InputIterator last, const allocator_type& a)
             : set(first, last, Compare(), a) {}  // C++14
-    set(initializer_list<value_type> il, const allocator_type& a)
+    set(initializer<value_type> il, const allocator_type& a)
         : set(il, Compare(), a) {}  // C++14
     ~set();
 
@@ -79,7 +79,7 @@ public:
             allocator_type::propagate_on_container_move_assignment::value &&
             is_nothrow_move_assignable<allocator_type>::value &&
             is_nothrow_move_assignable<key_compare>::value);
-    set& operator=(initializer_list<value_type> il);
+    set& operator=(initializer<value_type> il);
 
     // iterators:
           iterator begin() noexcept;
@@ -113,7 +113,7 @@ public:
     iterator insert(const_iterator position, value_type&& v);
     template <class InputIterator>
         void insert(InputIterator first, InputIterator last);
-    void insert(initializer_list<value_type> il);
+    void insert(initializer<value_type> il);
 
     iterator  erase(const_iterator position);
     iterator  erase(iterator position);  // C++14
@@ -245,13 +245,13 @@ public:
     explicit multiset(const allocator_type& a);
     multiset(const multiset& s, const allocator_type& a);
     multiset(multiset&& s, const allocator_type& a);
-    multiset(initializer_list<value_type> il, const value_compare& comp = value_compare());
-    multiset(initializer_list<value_type> il, const value_compare& comp,
+    multiset(initializer<value_type> il, const value_compare& comp = value_compare());
+    multiset(initializer<value_type> il, const value_compare& comp,
              const allocator_type& a);
     template <class InputIterator>
         multiset(InputIterator first, InputIterator last, const allocator_type& a)
             : set(first, last, Compare(), a) {}  // C++14
-    multiset(initializer_list<value_type> il, const allocator_type& a)
+    multiset(initializer<value_type> il, const allocator_type& a)
         : set(il, Compare(), a) {}  // C++14
     ~multiset();
 
@@ -261,7 +261,7 @@ public:
             allocator_type::propagate_on_container_move_assignment::value &&
             is_nothrow_move_assignable<allocator_type>::value &&
             is_nothrow_move_assignable<key_compare>::value);
-    multiset& operator=(initializer_list<value_type> il);
+    multiset& operator=(initializer<value_type> il);
 
     // iterators:
           iterator begin() noexcept;
@@ -295,7 +295,7 @@ public:
     iterator insert(const_iterator position, value_type&& v);
     template <class InputIterator>
         void insert(InputIterator first, InputIterator last);
-    void insert(initializer_list<value_type> il);
+    void insert(initializer<value_type> il);
 
     iterator  erase(const_iterator position);
     iterator  erase(iterator position);  // C++14
@@ -510,14 +510,14 @@ public:
 
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    set(initializer_list<value_type> __il, const value_compare& __comp = value_compare())
+    set(initializer<value_type> __il, const value_compare& __comp = value_compare())
         : __tree_(__comp)
         {
             insert(__il.begin(), __il.end());
         }
 
     _LIBCPP_INLINE_VISIBILITY
-    set(initializer_list<value_type> __il, const value_compare& __comp,
+    set(initializer<value_type> __il, const value_compare& __comp,
         const allocator_type& __a)
         : __tree_(__comp, __a)
         {
@@ -526,12 +526,12 @@ public:
 
 #if _LIBCPP_STD_VER > 11
     _LIBCPP_INLINE_VISIBILITY 
-    set(initializer_list<value_type> __il, const allocator_type& __a)
+    set(initializer<value_type> __il, const allocator_type& __a)
         : set(__il, key_compare(), __a) {}
 #endif
 
     _LIBCPP_INLINE_VISIBILITY
-    set& operator=(initializer_list<value_type> __il)
+    set& operator=(initializer<value_type> __il)
         {
             __tree_.__assign_unique(__il.begin(), __il.end());
             return *this;
@@ -623,7 +623,7 @@ public:
 
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    void insert(initializer_list<value_type> __il)
+    void insert(initializer<value_type> __il)
         {insert(__il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
@@ -922,14 +922,14 @@ public:
 
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    multiset(initializer_list<value_type> __il, const value_compare& __comp = value_compare())
+    multiset(initializer<value_type> __il, const value_compare& __comp = value_compare())
         : __tree_(__comp)
         {
             insert(__il.begin(), __il.end());
         }
 
     _LIBCPP_INLINE_VISIBILITY
-    multiset(initializer_list<value_type> __il, const value_compare& __comp,
+    multiset(initializer<value_type> __il, const value_compare& __comp,
         const allocator_type& __a)
         : __tree_(__comp, __a)
         {
@@ -938,12 +938,12 @@ public:
 
 #if _LIBCPP_STD_VER > 11
     _LIBCPP_INLINE_VISIBILITY 
-    multiset(initializer_list<value_type> __il, const allocator_type& __a)
+    multiset(initializer<value_type> __il, const allocator_type& __a)
         : multiset(__il, key_compare(), __a) {}
 #endif
 
     _LIBCPP_INLINE_VISIBILITY
-    multiset& operator=(initializer_list<value_type> __il)
+    multiset& operator=(initializer<value_type> __il)
         {
             __tree_.__assign_multi(__il.begin(), __il.end());
             return *this;
@@ -1035,7 +1035,7 @@ public:
 
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
     _LIBCPP_INLINE_VISIBILITY
-    void insert(initializer_list<value_type> __il)
+    void insert(initializer<value_type> __il)
         {insert(__il.begin(), __il.end());}
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 

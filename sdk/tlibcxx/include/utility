@@ -178,7 +178,7 @@ template<class T, class U=T>
 #include <__config>
 #include <__tuple>
 #include <type_traits>
-#include <initializer_list>
+#include <initializer>
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
 #pragma GCC system_header

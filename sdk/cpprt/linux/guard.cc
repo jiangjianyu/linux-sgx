@@ -73,7 +73,7 @@ extern "C" int __cxa_guard_acquire(volatile int32_t *guard_object)
 		{
 			return 1;
 		}
-		sched_yield();
+		// sched_yield();
 	}
 	return 0;
 }

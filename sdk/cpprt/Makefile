@@ -81,21 +81,10 @@ $(CPPRT): $(OBJS) prepare-libunwind libunwind
 
 .PHONY: libunwind
 libunwind:
-	cd linux/libunwind/ && ( test -f Makefile || ./autogen-linux.sh ) && $(MAKE) -j5
-
+	cd linux/libunwind/ && ( test -f Makefile || ( CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ ./configure --target=arm-linux --host=arm-linux )) && $(MAKE) -j5
 
 .PHONY: clean
 clean:
 	@-$(MAKE) -C linux/libunwind distclean
 	@$(RM) $(OBJS) $(CPPRT)
-	@$(RM) -r linux/libunwind/INSTALL             \
-              linux/libunwind/Makefile.in         \
-              linux/libunwind/aclocal.m4          \
-              linux/libunwind/autom4te.cache/     \
-              linux/libunwind/config/             \
-              linux/libunwind/configure           \
-              linux/libunwind/doc/Makefile.in     \
-              linux/libunwind/include/pthread_compat.h \
-              linux/libunwind/include/config.h.in \
-              linux/libunwind/src/Makefile.in
 

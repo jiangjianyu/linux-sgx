@@ -75,12 +75,12 @@ public:
     explicit map(const allocator_type& a);
     map(const map& m, const allocator_type& a);
     map(map&& m, const allocator_type& a);
-    map(initializer_list<value_type> il, const key_compare& comp = key_compare());
-    map(initializer_list<value_type> il, const key_compare& comp, const allocator_type& a);
+    map(initializer<value_type> il, const key_compare& comp = key_compare());
+    map(initializer<value_type> il, const key_compare& comp, const allocator_type& a);
     template <class InputIterator>
         map(InputIterator first, InputIterator last, const allocator_type& a)
             : map(first, last, Compare(), a) {}  // C++14
-    map(initializer_list<value_type> il, const allocator_type& a)
+    map(initializer<value_type> il, const allocator_type& a)
         : map(il, Compare(), a) {}  // C++14
    ~map();
 
@@ -90,7 +90,7 @@ public:
             allocator_type::propagate_on_container_move_assignment::value &&
             is_nothrow_move_assignable<allocator_type>::value &&
             is_nothrow_move_assignable<key_compare>::value);
-    map& operator=(initializer_list<value_type> il);
+    map& operator=(initializer<value_type> il);
 
     // iterators:
           iterator begin() noexcept;
@@ -135,7 +135,7 @@ public:
         iterator insert(const_iterator position, P&& p);
     template <class InputIterator>
         void insert(InputIterator first, InputIterator last);
-    void insert(initializer_list<value_type> il);
+    void insert(initializer<value_type> il);
 
     template <class... Args>
         pair<iterator, bool> try_emplace(const key_type& k, Args&&... args);          // C++17
@@ -293,13 +293,13 @@ public:
     explicit multimap(const allocator_type& a);
     multimap(const multimap& m, const allocator_type& a);
     multimap(multimap&& m, const allocator_type& a);
-    multimap(initializer_list<value_type> il, const key_compare& comp = key_compare());
-    multimap(initializer_list<value_type> il, const key_compare& comp,
+    multimap(initializer<value_type> il, const key_compare& comp = key_compare());
+    multimap(initializer<value_type> il, const key_compare& comp,
              const allocator_type& a);
     template <class InputIterator>
         multimap(InputIterator first, InputIterator last, const allocator_type& a)
             : multimap(first, last, Compare(), a) {} // C++14
-    multimap(initializer_list<value_type> il, const allocator_type& a)
+    multimap(initializer<value_type> il, const allocator_type& a)
         : multimap(il, Compare(), a) {} // C++14
     ~multimap();
 
@@ -309,7 +309,7 @@ public:
             allocator_type::propagate_on_container_move_assignment::value &&
             is_nothrow_move_assignable<allocator_type>::value &&
             is_nothrow_move_assignable<key_compare>::value);
-    multimap& operator=(initializer_list<value_type> il);
+    multimap& operator=(initializer<value_type> il);
 
     // iterators:
           iterator begin() noexcept;
@@ -347,7 +347,7 @@ public:
         iterator insert(const_iterator position, P&& p);
     template <class InputIterator>
         void insert(InputIterator first, InputIterator last);
-    void insert(initializer_list<value_type> il);
+    void insert(initializer<value_type> il);
 
     iterator  erase(const_iterator position);
     iterator  erase(iterator position); // C++14
@@ -444,7 +444,7 @@ swap(multimap<Key, T, Compare, Allocator>& x,
 #include <memory>
 #include <utility>
 #include <functional>
-#include <initializer_list>
+#include <initializer>
 #include <type_traits>
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
@@ -947,14 +947,14 @@ public:
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
-    map(initializer_list<value_type> __il, const key_compare& __comp = key_compare())
+    map(initializer<value_type> __il, const key_compare& __comp = key_compare())
         : __tree_(__vc(__comp))
         {
             insert(__il.begin(), __il.end());
         }
 
     _LIBCPP_INLINE_VISIBILITY
-    map(initializer_list<value_type> __il, const key_compare& __comp, const allocator_type& __a)
+    map(initializer<value_type> __il, const key_compare& __comp, const allocator_type& __a)
         : __tree_(__vc(__comp), typename __base::allocator_type(__a))
         {
             insert(__il.begin(), __il.end());
@@ -962,12 +962,12 @@ public:
 
 #if _LIBCPP_STD_VER > 11
     _LIBCPP_INLINE_VISIBILITY 
-    map(initializer_list<value_type> __il, const allocator_type& __a)
+    map(initializer<value_type> __il, const allocator_type& __a)
         : map(__il, key_compare(), __a) {}
 #endif
 
     _LIBCPP_INLINE_VISIBILITY
-    map& operator=(initializer_list<value_type> __il)
+    map& operator=(initializer<value_type> __il)
         {
             __tree_.__assign_unique(__il.begin(), __il.end());
             return *this;
@@ -1097,7 +1097,7 @@ public:
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
-    void insert(initializer_list<value_type> __il)
+    void insert(initializer<value_type> __il)
         {insert(__il.begin(), __il.end());}
 
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
@@ -1674,14 +1674,14 @@ public:
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
-    multimap(initializer_list<value_type> __il, const key_compare& __comp = key_compare())
+    multimap(initializer<value_type> __il, const key_compare& __comp = key_compare())
         : __tree_(__vc(__comp))
         {
             insert(__il.begin(), __il.end());
         }
 
     _LIBCPP_INLINE_VISIBILITY
-    multimap(initializer_list<value_type> __il, const key_compare& __comp, const allocator_type& __a)
+    multimap(initializer<value_type> __il, const key_compare& __comp, const allocator_type& __a)
         : __tree_(__vc(__comp), typename __base::allocator_type(__a))
         {
             insert(__il.begin(), __il.end());
@@ -1689,12 +1689,12 @@ public:
 
 #if _LIBCPP_STD_VER > 11
     _LIBCPP_INLINE_VISIBILITY 
-    multimap(initializer_list<value_type> __il, const allocator_type& __a)
+    multimap(initializer<value_type> __il, const allocator_type& __a)
         : multimap(__il, key_compare(), __a) {}
 #endif
 
     _LIBCPP_INLINE_VISIBILITY
-    multimap& operator=(initializer_list<value_type> __il)
+    multimap& operator=(initializer<value_type> __il)
         {
             __tree_.__assign_multi(__il.begin(), __il.end());
             return *this;
@@ -1813,7 +1813,7 @@ public:
 #ifndef _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS
 
     _LIBCPP_INLINE_VISIBILITY
-    void insert(initializer_list<value_type> __il)
+    void insert(initializer<value_type> __il)
         {insert(__il.begin(), __il.end());}
 
 #endif  // _LIBCPP_HAS_NO_GENERALIZED_INITIALIZERS

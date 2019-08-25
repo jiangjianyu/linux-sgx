@@ -40,7 +40,7 @@ public:
     explicit dynarray(size_type c);
     dynarray(size_type c, const T& v);
     dynarray(const dynarray& d);
-    dynarray(initializer_list<T>);
+    dynarray(initializer<T>);
 
     template <class Alloc>
       dynarray(allocator_arg_t, const Alloc& a, size_type c, const Alloc& alloc);
@@ -49,7 +49,7 @@ public:
     template <class Alloc>
       dynarray(allocator_arg_t, const Alloc& a, const dynarray& d, const Alloc& alloc);
     template <class Alloc>
-      dynarray(allocator_arg_t, const Alloc& a, initializer_list<T>, const Alloc& alloc);
+      dynarray(allocator_arg_t, const Alloc& a, initializer<T>, const Alloc& alloc);
     dynarray& operator=(const dynarray&) = delete;
     ~dynarray();
 
@@ -100,7 +100,7 @@ public:
 #include <__functional_base>
 #include <iterator>
 #include <stdexcept>
-#include <initializer_list>
+#include <initializer>
 #include <new>
 #include <algorithm>
 
@@ -166,7 +166,7 @@ public:
     _LIBCPP_INLINE_VISIBILITY
     dynarray(const dynarray& __d);
     _LIBCPP_INLINE_VISIBILITY
-    dynarray(initializer_list<value_type>);
+    dynarray(initializer<value_type>);
 
 //  We're not implementing these right now.
 //  Updated with the resolution of LWG issue #2255
@@ -177,7 +177,7 @@ public:
 //     template <typename _Alloc>
 //       dynarray(allocator_arg_t, const _Alloc& __alloc, const dynarray& __d);
 //     template <typename _Alloc>
-//       dynarray(allocator_arg_t, const _Alloc& __alloc, initializer_list<value_type>);
+//       dynarray(allocator_arg_t, const _Alloc& __alloc, initializer<value_type>);
 
     dynarray& operator=(const dynarray&) = delete;
     _LIBCPP_INLINE_VISIBILITY
@@ -245,7 +245,7 @@ dynarray<_Tp>::dynarray(size_type __c, const value_type& __v) : dynarray ()
 
 template <class _Tp>
 inline
-dynarray<_Tp>::dynarray(initializer_list<value_type> __il) : dynarray ()
+dynarray<_Tp>::dynarray(initializer<value_type> __il) : dynarray ()
 {
     size_t sz = __il.size();
     __base_ = __allocate (sz);
