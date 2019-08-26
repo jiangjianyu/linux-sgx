@@ -66,3 +66,5 @@ if [ $? -ne 0 ]; then
 fi
 
 pushd $out_dir;tar -xf $optlib_name;tar -xf $ae_file_name;rm -f $optlib_name;rm -f $ae_file_name;popd
+
+wget https://github.com/JuliaLang/openlibm/archive/v0.4.1.zip

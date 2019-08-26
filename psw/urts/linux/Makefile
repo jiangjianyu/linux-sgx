@@ -57,14 +57,15 @@ OBJS := urts.o
 
 URTS_OBJ        := $(OBJS)
 
-LIBURTS          := libsgx_urts.so
+LIBURTS          := libsgx_urts.a
 
 .PHONY: all
 all: $(LIBURTS) | $(BUILD_DIR)
 	@$(CP) $(LIBURTS)          $|
 
 $(LIBURTS): $(URTS_OBJ)
-	$(CXX) $(CXXFLAGS) -shared -Wl,-soname=$@ $< -o $@ $(LDFLAGS)
+	$(AR) rcsD $@ $<
+	# $(CXX) $(CXXFLAGS) -shared -Wl,-soname=$@ $< -o $@ $(LDFLAGS)
 
 $(URTS_OBJ): %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(INC) $< -o $@

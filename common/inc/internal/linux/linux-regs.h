@@ -76,6 +76,9 @@
 #  define xdi rdi
 #  define xbp rbp
 #  define xsp rsp
+
+#elif defined(__arm__)
+
 #else
 #  error unknown platform!
 #endif
@@ -139,6 +142,7 @@
 \name:
 .endm
 
+#if defined(__x86_64__)
 /* declare a function with visibility='hidden' */
 .macro DECLARE_LOCAL_FUNC name
     .globl \name
@@ -146,6 +150,13 @@
     .type \name, @function
 \name:
 .endm
+#else
+/* declare a function with visibility='hidden' */
+.macro DECLARE_LOCAL_FUNC name
+    .globl \name
+\name:
+.endm
+#endif
 
 .macro NAKED_PROLOG
     push    %xbp

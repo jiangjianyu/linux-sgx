@@ -51,13 +51,15 @@ namespace std
 	new_handler set_new_handler(new_handler handler) throw();
 };
 
-void* SGXAPI operator new (size_t) throw (std::bad_alloc);
-void* SGXAPI operator new[] (size_t) throw (std::bad_alloc);
+#define NEW_TYPE unsigned int
 
-void* SGXAPI operator new (size_t, const std::nothrow_t&) throw();
-void* SGXAPI operator new (size_t, void*) throw();
-void* SGXAPI operator new[] (size_t, const std::nothrow_t&) throw();
-void* SGXAPI operator new[] (size_t, void*) throw();
+void* SGXAPI operator new (NEW_TYPE) throw (std::bad_alloc);
+void* SGXAPI operator new[] (NEW_TYPE) throw (std::bad_alloc);
+
+void* SGXAPI operator new (NEW_TYPE, const std::nothrow_t&) throw();
+void* SGXAPI operator new (NEW_TYPE, void*) throw();
+void* SGXAPI operator new[] (NEW_TYPE, const std::nothrow_t&) throw();
+void* SGXAPI operator new[] (NEW_TYPE, void*) throw();
 
 void SGXAPI operator delete (void*) throw ();
 void SGXAPI operator delete (void*, const std::nothrow_t&) throw();

@@ -52,6 +52,9 @@ LINUX_PSW_DIR         := $(ROOT_DIR)/psw
 LINUX_SDK_DIR         := $(ROOT_DIR)/sdk
 LINUX_UNITTESTS       := $(ROOT_DIR)/unittests
 
+CC=arm-linux-gnueabi-gcc
+CXX=arm-linux-gnueabi-g++
+AR=arm-linux-gnueabi-ar
 
 CP    := /bin/cp -f
 MKDIR := mkdir -p
@@ -166,7 +169,7 @@ ENCLAVE_LDFLAGS  = -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 # Choose to use the optimized libraries (IPP/String/Math) by default.
 # Users could also use the non-optimized source code version by
 # explicitly specifying 'USE_OPT_LIBS=0'
-USE_OPT_LIBS ?= 1
+USE_OPT_LIBS = 0
 
 ifeq ($(ARCH), x86_64)
 IPP_SUBDIR = intel64
