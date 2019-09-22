@@ -17,8 +17,8 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_log1pf.c,v 1.12 2008/03/29 16:37:59 das Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const float
@@ -35,7 +35,7 @@ Lp7 = 1.4798198640e-01; /* 3E178897 */
 
 static const float zero = 0.0;
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 log1pf(float x)
 {
 	float hfsq,f,c,s,z,R,u;

@@ -28,8 +28,8 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_exp2f.c,v 1.9 2008/02/22 02:27:34 das Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 #define	TBLBITS	4
@@ -90,7 +90,7 @@ static const double exp2ft[TBLSIZE] = {
  *	Tang, P.  Table-driven Implementation of the Exponential Function
  *	in IEEE Floating-Point Arithmetic.  TOMS 15(2), 144-157 (1989).
  */
-DLLEXPORT float
+OLM_DLLEXPORT float
 exp2f(float x)
 {
 	double tv, twopk, u, z;

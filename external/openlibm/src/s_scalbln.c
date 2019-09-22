@@ -28,10 +28,11 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_scalbln.c,v 1.2 2005/03/07 04:57:50 das Exp $");
 
 #include <limits.h>
-#include <openlibm.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 scalbln (double x, long n)
 {
 	int in;
@@ -46,7 +47,7 @@ scalbln (double x, long n)
 	return (scalbn(x, in));
 }
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 scalblnf (float x, long n)
 {
 	int in;
@@ -61,7 +62,7 @@ scalblnf (float x, long n)
 	return (scalbnf(x, in));
 }
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 scalblnl (long double x, long n)
 {
 	int in;

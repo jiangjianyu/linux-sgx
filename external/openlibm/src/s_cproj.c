@@ -27,19 +27,19 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_cproj.c,v 1.1 2008/08/07 15:07:48 das Exp $");
 
-#include <complex.h>
-#include <openlibm.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
 
 #include "math_private.h"
 
-DLLEXPORT double complex
+OLM_DLLEXPORT double complex
 cproj(double complex z)
 {
 
 	if (!isinf(creal(z)) && !isinf(cimag(z)))
 		return (z);
 	else
-		return (cpack(INFINITY, copysign(0.0, cimag(z))));
+		return (CMPLX(INFINITY, copysign(0.0, cimag(z))));
 }
 
 #if LDBL_MANT_DIG == 53

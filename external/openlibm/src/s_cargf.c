@@ -27,11 +27,12 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_cargf.c,v 1.1 2007/12/12 23:43:51 das Exp $");
 
-#include <complex.h>
-#include <openlibm.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 cargf(float complex z)
 {
 

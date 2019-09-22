@@ -25,12 +25,13 @@
  *	Inexact flag raised if x not equal to floorf(x).
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const float huge = 1.0e30;
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 floorf(float x)
 {
 	int32_t i0,j0;

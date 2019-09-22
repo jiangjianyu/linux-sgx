@@ -28,11 +28,11 @@
  * $FreeBSD: src/lib/msun/src/s_fabsl.c,v 1.2 2003/10/25 19:53:28 des Exp $
  */
 
-#include <openlibm.h>
+#include <openlibm_math.h>
 #include "math_private.h"
 #include "fpmath.h"
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 fabsl(long double x)
 {
 	union IEEEl2bits u;

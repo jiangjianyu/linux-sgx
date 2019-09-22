@@ -107,7 +107,7 @@ sgx_libm:
 	$(MAKE) -C $(LIBM_PATH) ARCH=$(M_ARCH) 2> /dev/null
 
 openlibm:
-	$(MAKE) CROSS_ARM=1 ARCH=arm -C $(LIBM_PATH)
+	CC=$(CC) CXX=$(CXX) $(MAKE) TOOLPREFIX=$(TOOLPREFIX) ARCH=$(SIM_ARCH) -C $(LIBM_PATH)
 	$(CP) $(LIBM_PATH)/libopenlibm.a $(LIBM_PATH)/libm.a
 
 # ---------------------------------------------------

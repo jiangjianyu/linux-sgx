@@ -18,8 +18,8 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_tanf.c,v 1.17 2008/02/25 22:19:17 bde Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 //#define	INLINE_KERNEL_TANDF
 //#define INLINE_REM_PIO2F
 #include "math_private.h"
@@ -33,7 +33,7 @@ t2pio2 = 2*M_PI_2,			/* 0x400921FB, 0x54442D18 */
 t3pio2 = 3*M_PI_2,			/* 0x4012D97C, 0x7F3321D2 */
 t4pio2 = 4*M_PI_2;			/* 0x401921FB, 0x54442D18 */
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 tanf(float x)
 {
 	double y;

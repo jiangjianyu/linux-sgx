@@ -33,8 +33,8 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 #if LDBL_MANT_DIG == 64
 #include "../ld80/e_rem_pio2l.h"
@@ -44,7 +44,7 @@
 #error "Unsupported long double format"
 #endif
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 cosl(long double x)
 {
 	union IEEEl2bits z;

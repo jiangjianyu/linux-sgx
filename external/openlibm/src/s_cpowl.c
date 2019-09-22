@@ -45,11 +45,12 @@
  *
  */
 
-#include <complex.h>
-#include <openlibm.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
-DLLEXPORT long double complex
+OLM_DLLEXPORT long double complex
 cpowl(long double complex a, long double complex z)
 {
 	long double complex w;

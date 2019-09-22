@@ -52,9 +52,11 @@ LINUX_PSW_DIR         := $(ROOT_DIR)/psw
 LINUX_SDK_DIR         := $(ROOT_DIR)/sdk
 LINUX_UNITTESTS       := $(ROOT_DIR)/unittests
 
-CC=arm-linux-gnueabi-gcc
-CXX=arm-linux-gnueabi-g++
-AR=arm-linux-gnueabi-ar
+TOOLPREFIX=aarch64-linux-gnu-
+CC=aarch64-linux-gnu-gcc
+CXX=aarch64-linux-gnu-g++
+AR=aarch64-linux-gnu-ar
+SIM_ARCH=aarch64
 
 CP    := /bin/cp -f
 MKDIR := mkdir -p

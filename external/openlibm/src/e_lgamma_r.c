@@ -83,7 +83,8 @@
  *	
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const double
@@ -201,7 +202,7 @@ static const double zero=  0.00000000000000000000e+00;
 }
 
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_lgamma_r(double x, int *signgamp)
 {
 	double t,y,z,nadj,p,p1,p2,p3,q,r,w;

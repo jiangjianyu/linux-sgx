@@ -1,3 +1,0 @@
-ident.o: ident.c /usr/arm-linux-gnueabi/include/stdc-predef.h
-
-/usr/arm-linux-gnueabi/include/stdc-predef.h:

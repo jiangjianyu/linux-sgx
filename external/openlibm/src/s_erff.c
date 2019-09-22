@@ -16,7 +16,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_erff.c,v 1.8 2008/02/22 02:30:35 das Exp $");
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const float
@@ -79,7 +80,7 @@ sb3  =  4.72810211e+01F, /*  0x1.7a3f88p+5 */
 sb4  =  8.93033314e+00F; /*  0x1.1dc54ap+3 */
 
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 erff(float x)
 {
 	int32_t hx,ix,i;
@@ -126,7 +127,7 @@ erff(float x)
 	if(hx>=0) return one-r/x; else return  r/x-one;
 }
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 erfcf(float x)
 {
 	int32_t hx,ix;

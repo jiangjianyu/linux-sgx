@@ -15,7 +15,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_cbrt.c,v 1.17 2011/03/12 16:50:39 kargl Exp $");
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 /* cbrt(x)
@@ -33,7 +34,7 @@ P2 =  1.621429720105354466140,		/* 0x3ff9f160, 0x4a49d6c2 */
 P3 = -0.758397934778766047437,		/* 0xbfe844cb, 0xbee751d9 */
 P4 =  0.145996192886612446982;		/* 0x3fc2b000, 0xd4e4edd7 */
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 cbrt(double x)
 {
 	int32_t	hx;

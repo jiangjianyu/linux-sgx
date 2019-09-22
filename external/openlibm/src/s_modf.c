@@ -20,12 +20,13 @@
  *	No exception.
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const double one = 1.0;
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 modf(double x, double *iptr)
 {
 	int32_t i0,i1,j0;

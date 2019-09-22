@@ -26,13 +26,14 @@
  * $FreeBSD: src/lib/msun/src/s_isnan.c,v 1.9 2010/06/12 17:32:05 das Exp $
  */
 
-#include <openlibm.h>
-#include "math_private.h"
+#include <openlibm_math.h>
+
 #include "fpmath.h"
+#include "math_private.h"
 
 /* Provided by libc */
 #if 1
-DLLEXPORT int
+OLM_DLLEXPORT int
 (isnan) (double d)
 {
 	union IEEEd2bits u;
@@ -40,9 +41,19 @@ DLLEXPORT int
 	u.d = d;
 	return (u.bits.exp == 2047 && (u.bits.manl != 0 || u.bits.manh != 0));
 }
+
+OLM_DLLEXPORT int
+(__isnan) (double d)
+{
+	union IEEEd2bits u;
+
+	u.d = d;
+	return (u.bits.exp == 2047 && (u.bits.manl != 0 || u.bits.manh != 0));
+}
+
 #endif
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 __isnanf(float f)
 {
 	union IEEEf2bits u;
@@ -52,7 +63,7 @@ __isnanf(float f)
 }
 
 #ifdef LONG_DOUBLE
-DLLEXPORT int
+OLM_DLLEXPORT int
 __isnanl(long double e)
 {
 	union IEEEl2bits u;

@@ -44,11 +44,12 @@
  *
  */
 
-#include <complex.h>
-#include <openlibm.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
-DLLEXPORT float complex
+OLM_DLLEXPORT float complex
 cpowf(float complex a, float complex z)
 {
 	float complex w;

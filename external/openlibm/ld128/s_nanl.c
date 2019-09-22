@@ -26,12 +26,12 @@
  * $FreeBSD: src/lib/msun/ld128/s_nanl.c,v 1.3 2008/03/02 20:16:55 das Exp $
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
 
 #include "fpmath.h"
 #include "math_private.h"
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 nanl(const char *s)
 {
 	union {
@@ -39,7 +39,7 @@ nanl(const char *s)
 		uint32_t bits[4];
 	} u;
 
-	_scan_nan(u.bits, 4, s);
+	__scan_nan(u.bits, 4, s);
 	u.ieee.bits.exp = 0x7fff;
 	u.ieee.bits.manh |= 1ULL << 47;	/* make it a quiet NaN */
 	return (u.ieee.e);

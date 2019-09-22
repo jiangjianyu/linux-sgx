@@ -31,6 +31,7 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/bsdsrc/b_exp.c,v 1.9 2011/10/16 05:37:20 das Exp $");
 
+#include <openlibm_math.h>
 
 /* EXP(X)
  * RETURN THE EXPONENTIAL OF X
@@ -82,7 +83,7 @@ static const double lntiny = -0x1.77af8ebeae354p9;
 static const double invln2 = 0x1.71547652b82fep0;
 
 #if 0
-DLLEXPORT double exp(x)
+OLM_DLLEXPORT double exp(x)
 double x;
 {
 	double  z,hi,lo,c;
@@ -152,13 +153,13 @@ double x, c;
 			c= x - z*(p1+z*(p2+z*(p3+z*(p4+z*p5))));
 			c = (x*c)/(2.0-c);
 
-			return  scalb(1.+(hi-(lo - c)), k);
+			return  scalbn(1.+(hi-(lo - c)), k);
 		}
 		/* end of x > lntiny */
 
 		else
 		     /* exp(-big#) underflows to zero */
-		     if(finite(x))  return(scalb(1.0,-5000));
+		     if(isfinite(x))  return(scalbn(1.0,-5000));
 
 		     /* exp(-INF) is zero */
 		     else return(0.0);
@@ -167,5 +168,5 @@ double x, c;
 
 	else
 	/* exp(INF) is INF, exp(+big#) overflows to INF */
-	    return( finite(x) ?  scalb(1.0,5000)  : x);
+	    return( isfinite(x) ?  scalbn(1.0,5000)  : x);
 }

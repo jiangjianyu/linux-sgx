@@ -12,6 +12,8 @@ AM_INIT_AUTOMAKE([1.6 subdir-objects])
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([include/config.h])
 
+AC_CONFIG_MACRO_DIRS([m4])
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX

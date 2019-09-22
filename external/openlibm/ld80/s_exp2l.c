@@ -30,10 +30,11 @@
 #include <float.h>
 #include <stdint.h>
 
+#include "bsd_cdefs.h"
 #include "amd64/bsd_ieeefp.h"
 
-#include "fpmath.h"
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 #define	TBLBITS	7
@@ -210,7 +211,7 @@ static const double tbl[TBLSIZE * 2] = {
  *   The table entries each have 104 bits of accuracy, encoded as
  *   a pair of double precision values.
  */
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 exp2l(long double x)
 {
 	union IEEEl2bits u, v;

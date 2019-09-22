@@ -33,8 +33,8 @@
  * $FreeBSD: src/sys/amd64/include/asm.h,v 1.18 2007/08/22 04:26:07 jkoshy Exp $
  */
 
-#ifndef _MACHINE_ASM_H_
-#define	_MACHINE_ASM_H_
+#ifndef _BSD_ASM_H_
+#define _BSD_ASM_H_
 
 #ifdef __APPLE__
 #include "../i387/osx_asm.h"
@@ -62,7 +62,7 @@
 
 #define _START_ENTRY	.p2align 4,0x90
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__ELF__)
+#if defined(__ELF__)
 #define _ENTRY(x)	.text; _START_ENTRY; \
 			.globl CNAME(x); .type CNAME(x),@function; CNAME(x):
 #define	END(x)		.size x, . - x
@@ -76,7 +76,7 @@
 #define _START_ENTRY_WIN .code; _START_ENTRY
 #endif
 #define _ENTRY(x)	_START_ENTRY_WIN; \
-            .globl CNAME(x); .section .drectve; .ascii " -export:" #x; \
+            .globl CNAME(x); .section .drectve; .ascii " -export:", #x; \
             .section .text; .def CNAME(x); .scl 2; .type 32; .endef; CNAME(x):
 #endif
 
@@ -107,4 +107,4 @@
 #endif /* not lint and not STRIP_FBSDID */
 
 #endif
-#endif /* !_MACHINE_ASM_H_ */
+#endif /* !_BSD_ASM_H_ */

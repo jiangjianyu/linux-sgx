@@ -25,8 +25,10 @@
  */
 
 #include "cdefs-compat.h"
-#include <fenv.h>
-#include <openlibm.h>
+
+#include <openlibm_fenv.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 #ifndef type
@@ -44,7 +46,7 @@
  * significant bits than 'type'.  Hence, we bend over backwards for the
  * sake of correctness; an MD implementation could be more efficient.
  */
-DLLEXPORT dtype
+OLM_DLLEXPORT dtype
 fn(type x)
 {
 	fenv_t env;

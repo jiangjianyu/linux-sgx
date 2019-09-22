@@ -2,10 +2,10 @@
 /* include/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Block signals before mutex operations */
-#define CONFIG_BLOCK_SIGNALS /**/
+/* #undef CONFIG_BLOCK_SIGNALS */
 
 /* Enable Debug Frame */
-#define CONFIG_DEBUG_FRAME /**/
+/* #undef CONFIG_DEBUG_FRAME */
 
 /* Support for Microsoft ABI extensions */
 /* #undef CONFIG_MSABI_SUPPORT */
@@ -56,11 +56,11 @@
 
 /* Define to 1 if you have the declaration of `PT_GETFPREGS', and to 0 if you
    don't. */
-#define HAVE_DECL_PT_GETFPREGS 1
+#define HAVE_DECL_PT_GETFPREGS 0
 
 /* Define to 1 if you have the declaration of `PT_GETREGS', and to 0 if you
    don't. */
-#define HAVE_DECL_PT_GETREGS 1
+#define HAVE_DECL_PT_GETREGS 0
 
 /* Define to 1 if you have the declaration of `PT_IO', and to 0 if you don't.
    */
@@ -121,7 +121,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `mincore' function. */
-#define HAVE_MINCORE 1
+//#define HAVE_MINCORE 1
 
 /* Define to 1 if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
@@ -189,12 +189,8 @@
 /* Define to 1 if __thread keyword is supported by the C compiler. */
 /* #undef HAVE___THREAD */
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
-
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
 
 /* Name of package */
 #define PACKAGE "libunwind"
@@ -218,7 +214,7 @@
 #define PACKAGE_VERSION "1.3.1"
 
 /* The size of `off_t', as computed by sizeof. */
-#define SIZEOF_OFF_T 4
+#define SIZEOF_OFF_T 8
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

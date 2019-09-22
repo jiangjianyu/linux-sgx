@@ -27,9 +27,9 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_fma.c,v 1.8 2011/10/21 06:30:43 das Exp $");
 
-#include <fenv.h>
 #include <float.h>
-#include <openlibm.h>
+#include <openlibm_fenv.h>
+#include <openlibm_math.h>
 
 #include "math_private.h"
 
@@ -174,7 +174,7 @@ dd_mul(double a, double b)
  * Hardware instructions should be used on architectures that support it,
  * since this implementation will likely be several times slower.
  */
-DLLEXPORT double
+OLM_DLLEXPORT double
 fma(double x, double y, double z)
 {
 	double xs, ys, zs, adj;

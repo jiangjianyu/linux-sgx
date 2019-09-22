@@ -17,8 +17,8 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_expm1f.c,v 1.12 2011/10/21 06:26:38 das Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const float
@@ -37,7 +37,7 @@ invln2		= 1.4426950216e+00,/* 0x3fb8aa3b */
 Q1 = -3.3333212137e-2,		/* -0x888868.0p-28 */
 Q2 =  1.5807170421e-3;		/*  0xcf3010.0p-33 */
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 expm1f(float x)
 {
 	float y,hi,lo,c,t,e,hxs,hfx,r1,twopk;

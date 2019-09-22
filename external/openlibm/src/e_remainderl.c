@@ -27,10 +27,10 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/e_remainderl.c,v 1.1 2008/03/30 20:47:42 das Exp $");
 
-#include <openlibm.h>
+#include <openlibm_math.h>
 #include "math_private.h"
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 remainderl(long double x, long double y)
 {
 	int quo;

@@ -27,8 +27,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_cexp.c,v 1.3 2011/10/21 06:27:56 das Exp $");
 
-#include <complex.h>
-#include <openlibm.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
 
 #include "math_private.h"
 
@@ -36,7 +36,7 @@ static const u_int32_t
 exp_ovfl  = 0x40862e42,			/* high bits of MAX_EXP * ln2 ~= 710 */
 cexp_ovfl = 0x4096b8e4;			/* (MAX_EXP - MIN_DENORM_EXP) * ln2 */
 
-DLLEXPORT double complex
+OLM_DLLEXPORT double complex
 cexp(double complex z)
 {
 	double x, y, exp_x;
@@ -50,22 +50,22 @@ cexp(double complex z)
 
 	/* cexp(x + I 0) = exp(x) + I 0 */
 	if ((hy | ly) == 0)
-		return (cpack(exp(x), y));
+		return (CMPLX(exp(x), y));
 	EXTRACT_WORDS(hx, lx, x);
 	/* cexp(0 + I y) = cos(y) + I sin(y) */
 	if (((hx & 0x7fffffff) | lx) == 0)
-		return (cpack(cos(y), sin(y)));
+		return (CMPLX(cos(y), sin(y)));
 
 	if (hy >= 0x7ff00000) {
 		if (lx != 0 || (hx & 0x7fffffff) != 0x7ff00000) {
 			/* cexp(finite|NaN +- I Inf|NaN) = NaN + I NaN */
-			return (cpack(y - y, y - y));
+			return (CMPLX(y - y, y - y));
 		} else if (hx & 0x80000000) {
 			/* cexp(-Inf +- I Inf|NaN) = 0 + I 0 */
-			return (cpack(0.0, 0.0));
+			return (CMPLX(0.0, 0.0));
 		} else {
 			/* cexp(+Inf +- I Inf|NaN) = Inf + I NaN */
-			return (cpack(x, y - y));
+			return (CMPLX(x, y - y));
 		}
 	}
 
@@ -84,6 +84,6 @@ cexp(double complex z)
 		 *  -  x = NaN (spurious inexact exception from y)
 		 */
 		exp_x = exp(x);
-		return (cpack(exp_x * cos(y), exp_x * sin(y)));
+		return (CMPLX(exp_x * cos(y), exp_x * sin(y)));
 	}
 }

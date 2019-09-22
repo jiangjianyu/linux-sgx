@@ -17,8 +17,8 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/e_expf.c,v 1.16 2011/10/21 06:26:38 das Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const float
@@ -41,7 +41,7 @@ P2 = -2.7667332906e-3;		/* -0xb55215.0p-32 */
 
 static volatile float twom100 = 7.8886090522e-31;      /* 2**-100=0x0d800000 */
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ieee754_expf(float x)
 {
 	float y,hi=0.0,lo=0.0,c,t,twopk;

@@ -38,7 +38,8 @@
  * acknowledged.
  */
 
-#include <openlibm.h>
+#include <openlibm_math.h>
+
 #include "mathimpl.h"
 
 /* METHOD:
@@ -121,26 +122,26 @@ static struct Double ratfun_gam(double, double);
 
 static const double zero = 0., one = 1.0, tiny = 1e-300;
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 tgamma(x)
 	double x;
 {
 	struct Double u;
 
-	if (x >= 6) {
+	if (isgreaterequal(x, 6)) {
 		if(x > 171.63)
 			return (x / zero);
 		u = large_gam(x);
 		return(__exp__D(u.a, u.b));
-	} else if (x >= 1.0 + LEFT + x0)
+	} else if (isgreaterequal(x, 1.0 + LEFT + x0))
 		return (small_gam(x));
-	else if (x > 1.e-17)
+	else if (isgreater(x, 1.e-17))
 		return (smaller_gam(x));
-	else if (x > -1.e-17) {
+	else if (isgreater(x, -1.e-17)) {
 		if (x != 0.0)
 			u.a = one - tiny;	/* raise inexact */
 		return (one/x);
-	} else if (!finite(x))
+	} else if (!isfinite(x))
 		return (x - x);		/* x is NaN or -Inf */
 	else
 		return (neg_gam(x));

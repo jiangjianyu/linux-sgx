@@ -55,3 +55,9 @@ void * SGXAPI sgx_register_exception_handler(int is_first_handler, sgx_exception
     (void) exception_handler;
     return NULL;
 }
+
+sgx_status_t SGXAPI sgx_read_rand(unsigned char *rand, size_t length_in_bytes) {
+    (void) rand;
+    (void) length_in_bytes;   
+    return SGX_SUCCESS;
+}

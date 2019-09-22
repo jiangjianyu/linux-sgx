@@ -26,11 +26,12 @@
  * $FreeBSD: src/lib/msun/src/s_signbit.c,v 1.1 2004/07/19 08:16:10 das Exp $
  */
 
-#include <openlibm.h>
-#include "math_private.h"
-#include "fpmath.h"
+#include <openlibm_math.h>
 
-DLLEXPORT int
+#include "fpmath.h"
+#include "math_private.h"
+
+OLM_DLLEXPORT int
 __signbit(double d)
 {
 	union IEEEd2bits u;
@@ -39,7 +40,7 @@ __signbit(double d)
 	return (u.bits.sign);
 }
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 __signbitf(float f)
 {
 	union IEEEf2bits u;
@@ -49,7 +50,7 @@ __signbitf(float f)
 }
 
 #ifdef LONG_DOUBLE
-DLLEXPORT int
+OLM_DLLEXPORT int
 __signbitl(long double e)
 {
 	union IEEEl2bits u;

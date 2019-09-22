@@ -22,13 +22,16 @@
  * Method: call __ieee754_lgammaf_r
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
-extern int signgam;
-
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ieee754_lgammaf(float x)
 {
+#ifdef OPENLIBM_ONLY_THREAD_SAFE
+	int signgam;
+#endif
+
 	return __ieee754_lgammaf_r(x,&signgam);
 }

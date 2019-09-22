@@ -12,11 +12,12 @@
 
 #include <float.h>
 #include <limits.h>
-#include <openlibm.h>
-#include "math_private.h"
-#include "fpmath.h"
+#include <openlibm_math.h>
 
-DLLEXPORT long double
+#include "fpmath.h"
+#include "math_private.h"
+
+OLM_DLLEXPORT long double
 logbl(long double x)
 {
 	union IEEEl2bits u;

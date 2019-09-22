@@ -27,7 +27,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_tgammaf.c,v 1.1 2008/02/18 17:27:10 das Exp $");
 
-#include <openlibm.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 /*
@@ -36,7 +37,7 @@
  * essentially useless, since the function is superexponential and
  * floats have very limited range.
  */
-DLLEXPORT float
+OLM_DLLEXPORT float
 tgammaf(float x)
 {
 

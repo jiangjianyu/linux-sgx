@@ -28,10 +28,10 @@
 //__FBSDID("$FreeBSD: src/lib/msun/ld128/s_exp2l.c,v 1.3 2008/02/13 10:44:44 bde Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 #include <stdint.h>
 
 #include "fpmath.h"
-#include "openlibm.h"
 #include "math_private.h"
 
 #define	TBLBITS	7
@@ -354,7 +354,7 @@ static const float eps[TBLSIZE] = {
  *	Gal, S. and Bachelis, B.  An Accurate Elementary Mathematical Library
  *	for the IEEE Floating Point Standard.  TOMS 17(1), 26-46 (1991).
  */
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 exp2l(long double x)
 {
 	union IEEEl2bits u, v;

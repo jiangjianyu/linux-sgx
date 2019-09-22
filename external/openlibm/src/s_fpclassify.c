@@ -25,11 +25,17 @@
  *
  */
 
-#include <openlibm.h>
+#include <openlibm_math.h>
 #include "math_private.h"
 #include "fpmath.h"
 
-DLLEXPORT int
+OLM_DLLEXPORT int
+__fpclassify(double d)
+{
+	return __fpclassifyd(d);
+}
+
+OLM_DLLEXPORT int
 __fpclassifyd(double d)
 {
 	union IEEEd2bits u;
@@ -51,7 +57,7 @@ __fpclassifyd(double d)
 }
 		
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 __fpclassifyf(float f)
 {
 	union IEEEf2bits u;
@@ -73,7 +79,7 @@ __fpclassifyf(float f)
 }
 
 #ifdef LONG_DOUBLE
-DLLEXPORT int
+OLM_DLLEXPORT int
 __fpclassifyl(long double e)
 {
 	union IEEEl2bits u;

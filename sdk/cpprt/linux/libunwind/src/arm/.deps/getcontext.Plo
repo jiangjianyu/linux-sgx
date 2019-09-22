@@ -1,6 +1,0 @@
-arm/getcontext.lo: arm/getcontext.S \
- /usr/arm-linux-gnueabi/include/stdc-predef.h arm/offsets.h
-
-/usr/arm-linux-gnueabi/include/stdc-predef.h:
-
-arm/offsets.h:

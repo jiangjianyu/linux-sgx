@@ -16,7 +16,8 @@
 
 #include "cdefs-compat.h"
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const float
@@ -25,7 +26,7 @@ twom25  =  2.9802322388e-08,	/* 0x33000000 */
 huge   = 1.0e+30,
 tiny   = 1.0e-30;
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 scalbnf (float x, int n)
 {
 	int32_t k,ix;

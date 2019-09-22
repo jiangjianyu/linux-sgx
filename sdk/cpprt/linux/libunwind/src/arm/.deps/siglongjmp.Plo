@@ -1,4 +1,0 @@
-arm/siglongjmp.lo: arm/siglongjmp.S \
- /usr/arm-linux-gnueabi/include/stdc-predef.h
-
-/usr/arm-linux-gnueabi/include/stdc-predef.h:

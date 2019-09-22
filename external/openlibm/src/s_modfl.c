@@ -37,10 +37,10 @@
  */
 
 #include <float.h>
-#include <openlibm.h>
-#include "math_private.h"
+#include <openlibm_math.h>
 
 #include "fpmath.h"
+#include "math_private.h"
 
 #if LDBL_MANL_SIZE > 32
 #define	MASK	((u_int64_t)-1)
@@ -54,7 +54,7 @@
 
 static const long double zero[] = { 0.0L, -0.0L };
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 modfl(long double x, long double *iptr)
 {
 	union IEEEl2bits ux;

@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <stdio.h>
 
 #include "libunwind_i.h"
+#ifndef HAVE_SGX
 #include "os-linux.h"
 
 int
@@ -61,13 +62,18 @@ tdep_get_elf_image (struct elf_image *ei, pid_t pid, unw_word_t ip,
   maps_close (&mi);
   return rc;
 }
+#endif
 
 #ifndef UNW_REMOTE_ONLY
 
 void
 tdep_get_exe_image_path (char *path)
 {
+#ifndef HAVE_SGX
   strcpy(path, "/proc/self/exe");
+#else
+  strncpy(path, "/proc/self/exe", strlen("/proc/self/exe"));
+#endif
 }
 
 #endif /* !UNW_REMOTE_ONLY */

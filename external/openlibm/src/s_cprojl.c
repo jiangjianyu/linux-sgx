@@ -27,17 +27,17 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_cprojl.c,v 1.1 2008/08/07 15:07:48 das Exp $");
 
-#include <complex.h>
-#include <openlibm.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
 
 #include "math_private.h"
 
-DLLEXPORT long double complex
+OLM_DLLEXPORT long double complex
 cprojl(long double complex z)
 {
 
 	if (!isinf(creall(z)) && !isinf(cimagl(z)))
 		return (z);
 	else
-		return (cpackl(INFINITY, copysignl(0.0, cimagl(z))));
+		return (CMPLXL(INFINITY, copysignl(0.0, cimagl(z))));
 }

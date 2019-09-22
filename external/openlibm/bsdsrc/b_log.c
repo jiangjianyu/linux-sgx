@@ -31,8 +31,7 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/bsdsrc/b_log.c,v 1.9 2008/02/22 02:26:51 das Exp $");
 
-#include <openlibm.h>
-#include <errno.h>
+#include <openlibm_math.h>
 
 #include "mathimpl.h"
 
@@ -352,7 +351,7 @@ static double logF_tail[N+1] = {
 };
 
 #if 0
-DLLEXPORT double
+OLM_DLLEXPORT double
 #ifdef _ANSI_SOURCE
 log(double x)
 #else

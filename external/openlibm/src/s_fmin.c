@@ -27,11 +27,12 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_fmin.c,v 1.1 2004/06/30 07:04:01 das Exp $");
 
-#include <openlibm.h>
-#include "math_private.h"
-#include "fpmath.h"
+#include <openlibm_math.h>
 
-DLLEXPORT double
+#include "fpmath.h"
+#include "math_private.h"
+
+OLM_DLLEXPORT double
 fmin(double x, double y)
 {
 	union IEEEd2bits u[2];

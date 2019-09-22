@@ -17,11 +17,13 @@
 #ifndef _MATH_PRIVATE_H_
 #define	_MATH_PRIVATE_H_
 
+#include <openlibm_complex.h>
+
 #include "cdefs-compat.h"
 #include "types-compat.h"
 #include "fpmath.h"
-#include <complex.h>
 #include <stdint.h>
+#include "math_private_openbsd.h"
 
 /*
  * The original fdlibm code used statements like:
@@ -41,7 +43,7 @@
  * ints.
  */
 
-#if _IEEE_WORD_ORDER == _BIG_ENDIAN
+#if __FLOAT_WORD_ORDER__ == __ORDER_BIG_ENDIAN__
 
 typedef union
 {
@@ -59,7 +61,7 @@ typedef union
 
 #endif
 
-#if _IEEE_WORD_ORDER == _LITTLE_ENDIAN
+#if __FLOAT_WORD_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
 typedef union
 {
@@ -227,8 +229,8 @@ do {								\
 /*
  * Common routine to process the arguments to nan(), nanf(), and nanl().
  */
-void _scan_nan(u_int32_t *__words, int __num_words, const char *__s);
- 
+void __scan_nan(u_int32_t *__words, int __num_words, const char *__s);
+
 #ifdef __GNUCLIKE_ASM
 
 /* Asm versions of some functions. */
@@ -278,9 +280,7 @@ irint(double x)
 #define	__ieee754_fmod	fmod
 #define	__ieee754_pow	pow
 #define	__ieee754_lgamma lgamma
-#define	__ieee754_gamma	gamma
 #define	__ieee754_lgamma_r lgamma_r
-#define	__ieee754_gamma_r gamma_r
 #define	__ieee754_log10	log10
 #define	__ieee754_sinh	sinh
 #define	__ieee754_hypot	hypot
@@ -291,7 +291,6 @@ irint(double x)
 #define	__ieee754_jn	jn
 #define	__ieee754_yn	yn
 #define	__ieee754_remainder remainder
-#define	__ieee754_scalb	scalb
 #define	__ieee754_sqrtf	sqrtf
 #define	__ieee754_acosf	acosf
 #define	__ieee754_acoshf acoshf
@@ -304,9 +303,7 @@ irint(double x)
 #define	__ieee754_fmodf	fmodf
 #define	__ieee754_powf	powf
 #define	__ieee754_lgammaf lgammaf
-#define	__ieee754_gammaf gammaf
 #define	__ieee754_lgammaf_r lgammaf_r
-#define	__ieee754_gammaf_r gammaf_r
 #define	__ieee754_log10f log10f
 #define	__ieee754_log2f log2f
 #define	__ieee754_sinhf	sinhf
@@ -318,7 +315,6 @@ irint(double x)
 #define	__ieee754_jnf	jnf
 #define	__ieee754_ynf	ynf
 #define	__ieee754_remainderf remainderf
-#define	__ieee754_scalbf scalbf
 
 /* fdlibm kernel function */
 int	__kernel_rem_pio2(double*,double*,int,int,int);
@@ -332,9 +328,7 @@ double	__kernel_sin(double,double,int);
 double	__kernel_cos(double,double);
 double	__kernel_tan(double,double,int);
 double	__ldexp_exp(double,int);
-#ifdef _COMPLEX_H
 double complex __ldexp_cexp(double complex,int);
-#endif
 
 /* float precision kernel functions */
 #ifdef INLINE_REM_PIO2F
@@ -354,23 +348,23 @@ __inline
 #endif
 float	__kernel_tandf(double,int);
 float	__ldexp_expf(float,int);
-#ifdef _COMPLEX_H
 float complex __ldexp_cexpf(float complex,int);
-#endif
 
 /* long double precision kernel functions */
 long double __kernel_sinl(long double, long double, int);
 long double __kernel_cosl(long double, long double);
 long double __kernel_tanl(long double, long double, int);
 
+#undef OLM_DLLEXPORT
 #ifdef _WIN32
 # ifdef IMPORT_EXPORTS
-#  define DLLEXPORT __declspec(dllimport)
+#  define OLM_DLLEXPORT __declspec(dllimport)
 # else
-#  define DLLEXPORT __declspec(dllexport)
+#  define OLM_DLLEXPORT __declspec(dllexport)
 # endif
 #else
-#define DLLEXPORT __attribute__ ((visibility("default")))
+#define OLM_DLLEXPORT __attribute__ ((visibility("default")))
 #endif
+
 
 #endif /* !_MATH_PRIVATE_H_ */

@@ -28,8 +28,8 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_exp2.c,v 1.7 2008/02/22 02:27:34 das Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 #define	TBLBITS	8
@@ -337,7 +337,7 @@ static const double tbl[TBLSIZE * 2] = {
  *	Gal, S. and Bachelis, B.  An Accurate Elementary Mathematical Library
  *	for the IEEE Floating Point Standard.  TOMS 17(1), 26-46 (1991).
  */
-DLLEXPORT double
+OLM_DLLEXPORT double
 exp2(double x)
 {
 	double r, t, twopk, twopkp1000, z;
@@ -375,14 +375,14 @@ exp2(double x)
 	/* Compute r = exp2(y) = exp2t[i0] * p(z - eps[i]). */
 	t = tbl[i0];		/* exp2t[i0] */
 	z -= tbl[i0 + 1];	/* eps[i0]   */
-	if (k >= -1021 << 20)
+	if (k >= -(1021 << 20))
 		INSERT_WORDS(twopk, 0x3ff00000 + k, 0);
 	else
 		INSERT_WORDS(twopkp1000, 0x3ff00000 + k + (1000 << 20), 0);
 	r = t + t * z * (P1 + z * (P2 + z * (P3 + z * (P4 + z * P5))));
 
 	/* Scale by 2**(k>>20). */
-	if(k >= -1021 << 20) {
+	if(k >= -(1021 << 20)) {
 		if (k == 1024 << 20)
 			return (r * 2.0 * 0x1p1023);
 		return (r * twopk);

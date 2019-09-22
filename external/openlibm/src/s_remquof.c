@@ -13,7 +13,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_remquof.c,v 1.1 2005/03/25 04:40:44 das Exp $");
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const float Zero[] = {0.0, -0.0,};
@@ -26,7 +27,7 @@ static const float Zero[] = {0.0, -0.0,};
  * method.  In practice, this is far more bits than are needed to use
  * remquo in reduction algorithms.
  */
-DLLEXPORT float
+OLM_DLLEXPORT float
 remquof(float x, float y, int *quo)
 {
 	int32_t n,hx,hy,hz,ix,iy,sx,i;

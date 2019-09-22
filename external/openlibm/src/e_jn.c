@@ -40,7 +40,8 @@
  *	
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const double
@@ -50,7 +51,7 @@ one   =  1.00000000000000000000e+00; /* 0x3FF00000, 0x00000000 */
 
 static const double zero  =  0.00000000000000000000e+00;
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_jn(int n, double x)
 {
 	int32_t i,hx,ix,lx, sgn;
@@ -211,7 +212,7 @@ __ieee754_jn(int n, double x)
 	if(sgn==1) return -b; else return b;
 }
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_yn(int n, double x)
 {
 	int32_t i,hx,ix,lx;

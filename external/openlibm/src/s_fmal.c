@@ -27,11 +27,12 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_fmal.c,v 1.7 2011/10/21 06:30:43 das Exp $");
 
-#include <fenv.h>
 #include <float.h>
-#include <openlibm.h>
-#include "math_private.h"
+#include <openlibm_fenv.h>
+#include <openlibm_math.h>
+
 #include "fpmath.h"
+#include "math_private.h"
 
 /*
  * A struct dd represents a floating-point number with twice the precision
@@ -162,7 +163,7 @@ dd_mul(long double a, long double b)
  *	Dekker, T.  A Floating-Point Technique for Extending the
  *	Available Precision.  Numer. Math. 18, 224-242 (1971).
  */
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 fmal(long double x, long double y, long double z)
 {
 	long double xs, ys, zs, adj;

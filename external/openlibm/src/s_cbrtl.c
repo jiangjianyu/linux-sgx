@@ -18,13 +18,13 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_cbrtl.c,v 1.1 2011/03/12 19:37:35 kargl Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 // VBS
 //#include <ieeefp.h>
 
-#include "fpmath.h"    
-#include "openlibm.h"
+#include "fpmath.h"
 #include "math_private.h"
-#if defined(_WIN32) && defined(__i386__)
+#if defined(__i386__)
 #include "i387/bsd_ieeefp.h"
 #endif
 
@@ -33,7 +33,7 @@
 static const unsigned
     B1 = 709958130;	/* B1 = (127-127.0/3-0.03306235651)*2**23 */
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 cbrtl(long double x)
 {
 	union IEEEl2bits u, v;

@@ -26,14 +26,13 @@
  * $FreeBSD: src/lib/msun/src/s_conjf.c,v 1.2 2008/08/07 14:39:56 das Exp $
  */
 
-#include <complex.h>
+#include <openlibm_complex.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
-DLLEXPORT float complex
+OLM_DLLEXPORT float complex
 conjf(float complex z)
 {
 
-	return (cpackf(crealf(z), -cimagf(z)));
+	return (CMPLXF(crealf(z), -cimagf(z)));
 }

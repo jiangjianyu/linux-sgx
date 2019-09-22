@@ -32,12 +32,13 @@
  *	only sinh(0)=0 is exact for finite x.
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const double one = 1.0, shuge = 1.0e307;
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_sinh(double x)
 {
 	double t,h;

@@ -39,8 +39,8 @@
 #if defined(__APPLE__)
 #include "osx_asm.h"
 #define CNAME(x) EXT(x)
-#elif defined(__FreeBSD__) || defined(__linux__) || defined(_WIN32)
-#include "bsd_cdefs.h"
+#else
+#include "cdefs-compat.h"
 
 #ifdef PIC
 #define	PIC_PROLOGUE	\
@@ -72,7 +72,7 @@
 /* XXX should use .p2align 4,0x90 for -m486. */
 #define _START_ENTRY .p2align 2,0x90
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__ELF__)
+#if defined(__ELF__)
 #define CNAME(csym)		csym
 #define HIDENAME(asmsym)	.asmsym
 #define _ENTRY(x) .text; _START_ENTRY; \
@@ -89,7 +89,7 @@
 #define CNAME(csym)		_##csym
 #define HIDENAME(asmsym)	.asmsym
 #define _ENTRY(x) _START_ENTRY_WIN; \
-            .globl CNAME(x); .section .drectve; .ascii " -export:" #x; \
+            .globl CNAME(x); .section .drectve; .ascii " -export:", #x; \
             .section .text; .def CNAME(x); .scl 2; .type 32; .endef; CNAME(x):
 #endif
 

@@ -15,11 +15,12 @@
 
 #include <float.h>
 #include <limits.h>
-#include <openlibm.h>
-#include "math_private.h"
-#include "fpmath.h"
+#include <openlibm_math.h>
 
-DLLEXPORT int
+#include "fpmath.h"
+#include "math_private.h"
+
+OLM_DLLEXPORT int
 ilogbl(long double x)
 {
 	union IEEEl2bits u;

@@ -16,7 +16,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/e_lgammaf_r.c,v 1.12 2011/10/15 07:00:28 das Exp $");
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const float
@@ -134,7 +135,7 @@ static const float zero=  0.0000000000e+00;
 }
 
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ieee754_lgammaf_r(float x, int *signgamp)
 {
 	float t,y,z,nadj,p,p1,p2,p3,q,r,w;

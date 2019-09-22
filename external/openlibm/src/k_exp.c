@@ -27,9 +27,9 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/k_exp.c,v 1.1 2011/10/21 06:27:56 das Exp $");
 
-#include <complex.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const u_int32_t k = 1799;		/* constant for reduction */
@@ -71,7 +71,7 @@ __frexp_exp(double x, int *expt)
  * has filtered out very large x, for which overflow would be inevitable.
  */
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ldexp_exp(double x, int expt)
 {
 	double exp_x, scale;
@@ -83,7 +83,7 @@ __ldexp_exp(double x, int expt)
 	return (exp_x * scale);
 }
 
-DLLEXPORT double complex
+OLM_DLLEXPORT double complex
 __ldexp_cexp(double complex z, int expt)
 {
 	double x, y, exp_x, scale1, scale2;
@@ -103,6 +103,6 @@ __ldexp_cexp(double complex z, int expt)
 	half_expt = expt - half_expt;
 	INSERT_WORDS(scale2, (0x3ff + half_expt) << 20, 0);
 
-	return (cpack(cos(y) * exp_x * scale1 * scale2,
+	return (CMPLX(cos(y) * exp_x * scale1 * scale2,
 	    sin(y) * exp_x * scale1 * scale2));
 }

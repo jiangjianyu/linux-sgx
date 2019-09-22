@@ -16,7 +16,8 @@
  * Float version of e_log10.c.  See the latter for most comments.
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 #include "k_logf.h"
 
@@ -32,7 +33,7 @@ log10_2lo  =  7.9034151668e-07; /* 0x355427db */
 
 static const float zero   =  0.0;
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ieee754_log10f(float x)
 {
 	float f,hfsq,hi,lo,r,y;

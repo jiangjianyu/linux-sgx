@@ -79,8 +79,8 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const double
@@ -97,7 +97,7 @@ Lp7 = 1.479819860511658591e-01;  /* 3FC2F112 DF3E5244 */
 
 static const double zero = 0.0;
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 log1p(double x)
 {
 	double hfsq,f,c,s,z,R,u;

@@ -16,9 +16,9 @@
 /* long double version of hypot().  See e_hypot.c for most comments. */
 
 #include <float.h>
+#include <openlibm_math.h>
 
 #include "fpmath.h"
-#include "openlibm.h"
 #include "math_private.h"
 
 #define	GET_LDBL_MAN(h, l, v) do {	\
@@ -45,7 +45,7 @@ typedef	u_int64_t man_t;
 typedef	u_int32_t man_t;
 #endif
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 hypotl(long double x, long double y)
 {
 	long double a=x,b=y,t1,t2,y1,y2,w;

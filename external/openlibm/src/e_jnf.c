@@ -16,7 +16,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/e_jnf.c,v 1.11 2010/11/13 10:54:10 uqs Exp $");
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const float
@@ -25,7 +26,7 @@ one   =  1.0000000000e+00; /* 0x3F800000 */
 
 static const float zero  =  0.0000000000e+00;
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ieee754_jnf(int n, float x)
 {
 	int32_t i,hx,ix, sgn;
@@ -163,7 +164,7 @@ __ieee754_jnf(int n, float x)
 	if(sgn==1) return -b; else return b;
 }
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ieee754_ynf(int n, float x)
 {
 	int32_t i,hx,ix,ib;

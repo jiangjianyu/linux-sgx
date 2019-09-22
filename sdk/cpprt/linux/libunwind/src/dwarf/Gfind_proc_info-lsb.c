@@ -42,7 +42,7 @@ struct table_entry
 
 #ifndef UNW_REMOTE_ONLY
 
-#ifdef __linux
+#if defined(__linux) && (!HAVE_SGX)
 #include "os-linux.h"
 #endif
 
@@ -142,7 +142,7 @@ load_debug_frame (const char *file, char **buf, size_t *bufsize, int is_local)
 static int
 find_binary_for_address (unw_word_t ip, char *name, size_t name_size)
 {
-#if defined(__linux) && (!UNW_REMOTE_ONLY)
+#if defined(__linux) && (!UNW_REMOTE_ONLY) && (!HAVE_SGX)
   struct map_iterator mi;
   int found = 0;
   int pid = getpid ();
@@ -427,6 +427,7 @@ dwarf_find_debug_frame (int found, unw_dyn_info_t *di_debug, unw_word_t ip,
 
 #ifndef UNW_REMOTE_ONLY
 
+#ifndef HAVE_SGX
 static Elf_W (Addr)
 dwarf_find_eh_frame_section(struct dl_phdr_info *info)
 {
@@ -459,10 +460,11 @@ dwarf_find_eh_frame_section(struct dl_phdr_info *info)
          eh_frame);
 
 out:
-  munmap (ei.image, ei.size);
+  FREE_MEMORY (ei.image, ei.size);
 
   return eh_frame;
 }
+#endif
 
 struct dwarf_callback_data
   {
@@ -543,6 +545,13 @@ dwarf_callback (struct dl_phdr_info *info, size_t size, void *ptr)
     }
   else
     {
+#if HAVE_SGX
+      //SGX Enclave.so will always include the explicit '.eh_frame_hdr' section.
+      //So this function won't be called inside SGX.
+      abort();
+      return -1;
+#else
+
       Elf_W (Addr) eh_frame;
       Debug (1, "no .eh_frame_hdr section found\n");
       eh_frame = dwarf_find_eh_frame_section (info);
@@ -558,6 +567,7 @@ dwarf_callback (struct dl_phdr_info *info, size_t size, void *ptr)
 	  synth_eh_frame_hdr.eh_frame = eh_frame;
           hdr = &synth_eh_frame_hdr;
         }
+#endif
     }
 
   if (hdr)

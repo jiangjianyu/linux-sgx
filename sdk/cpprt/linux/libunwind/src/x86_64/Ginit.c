@@ -78,17 +78,20 @@ static int mem_validate_pipe[2] = {-1, -1};
 static inline void
 open_pipe (void)
 {
+  #ifndef HAVE_SGX
   /* ignore errors for closing invalid fd's */
   close (mem_validate_pipe[0]);
   close (mem_validate_pipe[1]);
 
   pipe2 (mem_validate_pipe, O_CLOEXEC | O_NONBLOCK);
+  #endif
 }
 
 ALWAYS_INLINE
 static int
 write_validate (void *addr)
 {
+  #ifndef HAVE_SGX
   int ret = -1;
   ssize_t bytes = 0;
 
@@ -114,11 +117,29 @@ write_validate (void *addr)
   while ( errno == EINTR );
 
   return ret;
+#else
+  /*
+   * This function's purpose:
+   * https://github.com/libunwind/libunwind/commit/836c91c43d7a996028aa7e8d1f53630a6b8e7cbe#diff-98fa8f303410f32876910fb84c203cd6
+   *
+   * The calls to mincore() or msync() are not checking for actual accessibility this could lead to SIGSEGV if the address from a mapped page with the
+   * PROT_NONE property occurs on the stack. Hence an attempt to write one byte from the checked address to a pipe will fail if the address is not readable.
+   *
+   *
+   * But we think this function isn't needed inside SGX Enclave.
+  */
+  return 0;
+#endif
 }
 
 static int (*mem_validate_func) (void *addr, size_t len);
 static int msync_validate (void *addr, size_t len)
 {
+  #ifdef HAVE_SGX
+  if(!sgx_is_within_enclave(addr, len))
+    abort();
+  #endif
+
   if (msync (addr, len, MS_ASYNC) != 0)
     {
       return -1;
@@ -144,7 +165,7 @@ static int mincore_validate (void *addr, size_t len)
     {
       if (!(mvec[i] & 1)) return -1;
     }
-
+  
   return write_validate (addr);
 }
 #endif
@@ -317,7 +338,11 @@ get_static_proc_name (unw_addr_space_t as, unw_word_t ip,
                       char *buf, size_t buf_len, unw_word_t *offp,
                       void *arg)
 {
+#ifdef HAVE_SGX
+  return -1;
+#else
   return _Uelf64_get_proc_name (as, getpid (), ip, buf, buf_len, offp);
+#endif
 }
 
 HIDDEN void

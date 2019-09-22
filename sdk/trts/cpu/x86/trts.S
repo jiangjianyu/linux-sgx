@@ -20,6 +20,12 @@ DECLARE_LOCAL_FUNC abort
 
 DECLARE_LOCAL_FUNC abort
 
+#elif defined(__aarch64__)
+
+DECLARE_LOCAL_FUNC abort
+	ADD W0, W1, W2
+
 #else
 
+#wrong arch
 #endif

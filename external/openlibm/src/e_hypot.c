@@ -47,11 +47,11 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_hypot(double x, double y)
 {
 	double a,b,t1,t2,y1,y2,w;

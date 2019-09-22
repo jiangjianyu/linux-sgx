@@ -25,12 +25,11 @@
  */
 
 #include "cdefs-compat.h"
-//VBS begin
-//#include <sys/limits.h>
+
 #include <limits.h>
-//VBS end
-#include <fenv.h>
-#include <openlibm.h>
+#include <openlibm_fenv.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 #ifndef type
@@ -56,7 +55,7 @@ static const type dtype_max = DTYPE_MAX + 0.5;
 #define	INRANGE(x)	(dtype_max - DTYPE_MAX != 0.5 || \
 			 ((x) > dtype_min && (x) < dtype_max))
 
-DLLEXPORT dtype
+OLM_DLLEXPORT dtype
 fn(type x)
 {
 

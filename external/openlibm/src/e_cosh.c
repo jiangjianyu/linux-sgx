@@ -35,12 +35,13 @@
  *	only cosh(0)=1 is exact for finite x.
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const double one = 1.0, half=0.5, huge = 1.0e300;
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_cosh(double x)
 {
 	double t,w;

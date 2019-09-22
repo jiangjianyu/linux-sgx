@@ -26,11 +26,12 @@
  * $FreeBSD: src/lib/msun/src/s_copysignl.c,v 1.2 2007/01/07 07:54:21 das Exp $
  */
 
-#include <openlibm.h>
-#include "math_private.h"
-#include "fpmath.h"
+#include <openlibm_math.h>
 
-DLLEXPORT long double
+#include "fpmath.h"
+#include "math_private.h"
+
+OLM_DLLEXPORT long double
 copysignl(long double x, long double y)
 {
 	union IEEEl2bits ux, uy;

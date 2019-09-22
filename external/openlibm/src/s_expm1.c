@@ -109,8 +109,8 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const double
@@ -128,7 +128,7 @@ Q3  =  -7.93650757867487942473e-05, /* BF14CE19 9EAADBB7 */
 Q4  =   4.00821782732936239552e-06, /* 3ED0CFCA 86E65239 */
 Q5  =  -2.01099218183624371326e-07; /* BE8AFDB7 6E09C32D */
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 expm1(double x)
 {
 	double y,hi,lo,c,t,e,hxs,hfx,r1,twopk;
@@ -147,7 +147,7 @@ expm1(double x)
 		    GET_LOW_WORD(low,x);
 		    if(((hx&0xfffff)|low)!=0)
 		         return x+x; 	 /* NaN */
-		    else return (xsb==0)? x:-1.0;/* exp(+-inf)={inf,-1} */
+		    else return (xsb==0)? x:-1.0;/* exp(+-inf)-1={inf,-1} */
 	        }
 	        if(x > o_threshold) return huge*huge; /* overflow */
 	    }

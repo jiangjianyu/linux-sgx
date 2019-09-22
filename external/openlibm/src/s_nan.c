@@ -30,13 +30,13 @@
 //#include <sys/endian.h>
 #include <ctype.h>
 #include <float.h>
-#include <openlibm.h>
+#include <openlibm_math.h>
 #include <stdint.h>
 #include <string.h> //for memset
 
 #include "math_private.h"
 
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
+#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__DragonFly__)
 static __inline int digittoint(int c) {
 	if ('0' <= c && c <= '9')
 		return (c - '0');
@@ -61,8 +61,8 @@ static __inline int digittoint(int c) {
  * consider valid, so we might be violating the C standard. But it's
  * impossible to use nan(3) portably anyway, so this seems good enough.
  */
-DLLEXPORT void
-_scan_nan(u_int32_t *words, int num_words, const char *s)
+OLM_DLLEXPORT void
+__scan_nan(u_int32_t *words, int num_words, const char *s)
 {
 	int si;		/* index into s */
 	int bitpos;	/* index into words (in bits) */
@@ -78,7 +78,7 @@ _scan_nan(u_int32_t *words, int num_words, const char *s)
 		;
 
 	/* Scan backwards, filling in the bits in words[] as we go. */
-#if _BYTE_ORDER == _LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	for (bitpos = 0; bitpos < 32 * num_words; bitpos += 4) {
 #else
 	for (bitpos = 32 * num_words - 4; bitpos >= 0; bitpos -= 4) {
@@ -89,7 +89,7 @@ _scan_nan(u_int32_t *words, int num_words, const char *s)
 	}
 }
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 nan(const char *s)
 {
 	union {
@@ -97,8 +97,8 @@ nan(const char *s)
 		u_int32_t bits[2];
 	} u;
 
-	_scan_nan(u.bits, 2, s);
-#if _BYTE_ORDER == _LITTLE_ENDIAN
+	__scan_nan(u.bits, 2, s);
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	u.bits[1] |= 0x7ff80000;
 #else
 	u.bits[0] |= 0x7ff80000;
@@ -106,7 +106,7 @@ nan(const char *s)
 	return (u.d);
 }
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 nanf(const char *s)
 {
 	union {
@@ -114,7 +114,7 @@ nanf(const char *s)
 		u_int32_t bits[1];
 	} u;
 
-	_scan_nan(u.bits, 1, s);
+	__scan_nan(u.bits, 1, s);
 	u.bits[0] |= 0x7fc00000;
 	return (u.f);
 }

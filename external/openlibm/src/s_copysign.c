@@ -19,10 +19,11 @@
  * with the sign bit of y.
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 copysign(double x, double y)
 {
 	u_int32_t hx,hy;

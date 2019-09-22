@@ -21,11 +21,11 @@
  */
 
 #include <limits.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 ilogb(double x)
 {
 	int32_t hx,lx,ix;

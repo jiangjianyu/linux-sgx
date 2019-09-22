@@ -23,11 +23,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/msun/powerpc/fenv.c,v 1.3 2011/10/16 05:37:56 das Exp $
+ * $FreeBSD$
  */
 
 #define	__fenv_static
-#include "fenv.h"
+#include <openlibm_fenv.h>
 
 #ifdef __GNUC_GNU_INLINE__
 #error "This file must be compiled with C99 'inline' semantics"

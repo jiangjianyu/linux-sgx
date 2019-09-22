@@ -41,7 +41,8 @@ CPPFLAGS := -I$(COMMON_DIR)/inc/internal \
 
 OBJ := sethread_mutex.o \
        sethread_cond.o  \
-       sethread_utils.o
+       sethread_utils.o \
+       sethread_fake.o
 
 LIBTLIBTHREAD := libtlibthread.a
 

@@ -21,11 +21,11 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 nextafter(double x, double y)
 {
 	volatile double t;

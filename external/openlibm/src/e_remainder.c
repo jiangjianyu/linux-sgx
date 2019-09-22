@@ -24,14 +24,14 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const double zero = 0.0;
 
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_remainder(double x, double p)
 {
 	int32_t hx,hp;

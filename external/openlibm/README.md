@@ -1,35 +1,37 @@
-## OpenLibm
+# OpenLibm
 
-OpenLibm is an effort to have a high quality, portable, standalone
+[![Travis](https://travis-ci.org/JuliaLang/openlibm.svg?branch=master)](https://travis-ci.org/JuliaLang/openlibm)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/30kn644g79f0x6va/branch/master?svg=true)](https://ci.appveyor.com/project/ararslan/openlibm/branch/master)
+
+[OpenLibm](http://www.openlibm.org) is an effort to have a high quality, portable, standalone
 C mathematical library ([`libm`](http://en.wikipedia.org/wiki/libm)).
 It can be used standalone in applications and programming language
-implementations. 
+implementations.
 
 The project was born out of a need to have a good `libm` for the
 [Julia programming langage](http://www.julialang.org) that worked
 consistently across compilers and operating systems, and in 32-bit and
 64-bit environments.
 
-### History
+## Platform support
 
-The OpenLibm code derives from the [FreeBSD
-msun](http://svnweb.freebsd.org/base/head/lib/msun/) implementation,
-which in turn derives from [FDLIBM
-5.3](http://www.netlib.org/fdlibm/). As a result, it includes a number
-of fixes and updates to FDLIBM that have accumulated over the years in
-`msun`, and optimized versions of many functions.
+OpenLibm builds on Linux, Mac OS X, Windows, FreeBSD, OpenBSD, and DragonFly BSD.
+It builds with both GCC and clang. Although largely tested and widely
+used on x86 architectures, OpenLibm also supports ARM and
+PowerPC.
 
-### Platform support
+## Build instructions
 
-OpenLibm builds on Linux, Mac OS X, and Windows, and with little
-effort, should build on FreeBSD as well. It builds with both GCC and
-clang. Although largely tested on x86, it also includes experimental
-support for ARM. The original `msun` also includes support for mips,
-sparc64, powerpc, ia64, and alpha. These are present in the OpenLibm
-source tree, but no attempt has been made to build any of these.
+1. Use GNU Make to build OpenLibm. This is `make` on most systems, but `gmake` on BSDs.
+2. Use `make USEGCC=1` to build with GCC. This is the default on
+   Linux and Windows.
+3. Use `make USECLANG=1` to build with clang. This is the default on OS X, FreeBSD,
+   and OpenBSD.
+4. Architectures are auto-detected. Use `make ARCH=i386` to force a
+   build for i386. Other supported architectures are i486, i586, and
+   i686. GCC 4.8 is the minimum requirement for correct codegen on
+   older 32-bit architectures.
 
-### Build instructions
+## Acknowledgements
 
-1. `make` or `make USEGCC=1` to build with GCC. This is the default on
-   Linux and Windows.  
-2. `make USECLANG=1` to build with clang. This is the default on OS X.
+PowerPC support for openlibm was graciously sponsored by IBM.

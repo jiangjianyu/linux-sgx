@@ -20,16 +20,16 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
 #include "fpmath.h"
-#include "openlibm.h"
 #include "math_private.h"
 
 #if LDBL_MAX_EXP != 0x4000
 #error "Unsupported long double format"
 #endif
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 nexttoward(double x, long double y)
 {
 	union IEEEl2bits uy;

@@ -29,14 +29,15 @@
  *	acosh(NaN) is NaN without signal.
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const double
 one	= 1.0,
 ln2	= 6.93147180559945286227e-01;  /* 0x3FE62E42, 0xFEFA39EF */
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_acosh(double x)
 {
 	double t;

@@ -26,11 +26,12 @@
  * $FreeBSD: src/lib/msun/src/s_isnormal.c,v 1.1 2004/07/09 03:32:39 das Exp $
  */
 
-#include <openlibm.h>
-#include "math_private.h"
-#include "fpmath.h"
+#include <openlibm_math.h>
 
-DLLEXPORT int
+#include "fpmath.h"
+#include "math_private.h"
+
+OLM_DLLEXPORT int
 __isnormal(double d)
 {
 	union IEEEd2bits u;
@@ -39,7 +40,7 @@ __isnormal(double d)
 	return (u.bits.exp != 0 && u.bits.exp != 2047);
 }
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 __isnormalf(float f)
 {
 	union IEEEf2bits u;
@@ -49,7 +50,7 @@ __isnormalf(float f)
 }
 
 #ifdef LONG_DOUBLE
-DLLEXPORT int
+OLM_DLLEXPORT int
 __isnormall(long double e)
 {
 	union IEEEl2bits u;

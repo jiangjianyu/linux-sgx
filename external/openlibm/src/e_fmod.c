@@ -20,12 +20,13 @@
  * Method: shift and subtract
  */
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const double one = 1.0, Zero[] = {0.0, -0.0,};
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 __ieee754_fmod(double x, double y)
 {
 	int32_t n,hx,hy,hz,ix,iy,sx,i;

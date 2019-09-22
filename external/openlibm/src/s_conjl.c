@@ -26,14 +26,13 @@
  * $FreeBSD: src/lib/msun/src/s_conjl.c,v 1.2 2008/08/07 14:39:56 das Exp $
  */
 
-#include <complex.h>
+#include <openlibm_complex.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
-DLLEXPORT long double complex
+OLM_DLLEXPORT long double complex
 conjl(long double complex z)
 {
 
-	return (cpackl(creall(z), -cimagl(z)));
+	return (CMPLXL(creall(z), -cimagl(z)));
 }

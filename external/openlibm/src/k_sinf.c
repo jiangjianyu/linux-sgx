@@ -19,7 +19,8 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/k_sinf.c,v 1.16 2009/06/03 08:16:34 ed Exp $");
 #endif
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 /* |sin(x)/x - s(x)| < 2**-37.5 (~[-4.89e-12, 4.824e-12]). */
@@ -33,7 +34,7 @@ S4 =  0x16cd878c3b46a7.0p-71;	/*  0.0000027183114939898219064 */
 extern
 #endif
 //__inline float
-DLLEXPORT float 
+OLM_DLLEXPORT float 
 __kernel_sindf(double x)
 {
 	double r, s, w, z;

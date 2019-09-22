@@ -21,16 +21,16 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
 #include "invtrig.h"
-#include "openlibm.h"
 #include "math_private.h"
 
 static const long double
 one =  1.00000000000000000000e+00,
 huge = 1.000e+300;
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 asinl(long double x)
 {
 	union IEEEl2bits u;

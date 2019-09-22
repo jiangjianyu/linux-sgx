@@ -26,13 +26,13 @@
  * $FreeBSD: src/lib/msun/i387/fenv.c,v 1.8 2011/10/21 06:25:31 das Exp $
  */
 
-#include <cdefs-compat.h>
-#include <types-compat.h>
-#include <math_private.h>
-#include <i387/bsd_npx.h>
+#include "cdefs-compat.h"
+#include "types-compat.h"
+#include "math_private.h"
+#include "i387/bsd_npx.h"
 
 #define	__fenv_static
-#include "fenv.h"
+#include <openlibm_fenv.h>
 
 #ifdef __GNUC_GNU_INLINE__
 #error "This file must be compiled with C99 'inline' semantics"
@@ -90,10 +90,10 @@ __test_sse(void)
 	return (0);
 }
 
-extern inline DLLEXPORT int feclearexcept(int __excepts);
-extern inline DLLEXPORT int fegetexceptflag(fexcept_t *__flagp, int __excepts);
+extern inline OLM_DLLEXPORT int feclearexcept(int __excepts);
+extern inline OLM_DLLEXPORT int fegetexceptflag(fexcept_t *__flagp, int __excepts);
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 fesetexceptflag(const fexcept_t *flagp, int excepts)
 {
 	fenv_t env;
@@ -114,7 +114,7 @@ fesetexceptflag(const fexcept_t *flagp, int excepts)
 	return (0);
 }
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 feraiseexcept(int excepts)
 {
 	fexcept_t ex = excepts;
@@ -124,9 +124,9 @@ feraiseexcept(int excepts)
 	return (0);
 }
 
-extern inline DLLEXPORT int fetestexcept(int __excepts);
-extern inline DLLEXPORT int fegetround(void);
-extern inline DLLEXPORT int fesetround(int __round);
+extern inline OLM_DLLEXPORT int fetestexcept(int __excepts);
+extern inline OLM_DLLEXPORT int fegetround(void);
+extern inline OLM_DLLEXPORT int fesetround(int __round);
 
 int
 fegetenv(fenv_t *envp)
@@ -163,9 +163,9 @@ feholdexcept(fenv_t *envp)
 	return (0);
 }
 
-extern inline DLLEXPORT int fesetenv(const fenv_t *__envp);
+extern inline OLM_DLLEXPORT int fesetenv(const fenv_t *__envp);
 
-DLLEXPORT int
+OLM_DLLEXPORT int
 feupdateenv(const fenv_t *envp)
 {
 	uint32_t mxcsr;
@@ -182,7 +182,7 @@ feupdateenv(const fenv_t *envp)
 }
 
 int
-__feenableexcept(int mask)
+feenableexcept(int mask)
 {
 	uint32_t mxcsr, omask;
 	uint16_t control;
@@ -204,7 +204,7 @@ __feenableexcept(int mask)
 }
 
 int
-__fedisableexcept(int mask)
+fedisableexcept(int mask)
 {
 	uint32_t mxcsr, omask;
 	uint16_t control;
@@ -224,6 +224,3 @@ __fedisableexcept(int mask)
 	}
 	return (omask);
 }
-
-__weak_reference(__feenableexcept, feenableexcept);
-__weak_reference(__fedisableexcept, fedisableexcept);

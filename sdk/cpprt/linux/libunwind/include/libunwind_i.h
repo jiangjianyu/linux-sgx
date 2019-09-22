@@ -50,7 +50,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <assert.h>
 #include <libunwind.h>
 #include <pthread.h>
+#ifndef HAVE_SGX
 #include <signal.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -112,6 +115,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
    unconditionally and if -lpthread is around, they'll call the
    corresponding routines otherwise, they do nothing.  */
 
+#if HAVE_SGX
+#define mutex_init(l)   do { *l = PTHREAD_MUTEX_INITIALIZER; } while(0)
+#define mutex_lock(l)   do { if (pthread_mutex_lock ((l)) != 0) abort(); } while(0)
+#define mutex_unlock(l) do { if (pthread_mutex_unlock ((l)) != 0) abort(); } while(0)
+#else
 #pragma weak pthread_mutex_init
 #pragma weak pthread_mutex_lock
 #pragma weak pthread_mutex_unlock
@@ -122,6 +130,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
         (pthread_mutex_lock != NULL ? pthread_mutex_lock (l) : 0)
 #define mutex_unlock(l)                                                 \
         (pthread_mutex_unlock != NULL ? pthread_mutex_unlock (l) : 0)
+#endif
+
 
 #ifdef HAVE_ATOMIC_OPS_H
 # include <atomic_ops.h>
@@ -217,6 +227,15 @@ do {                                            \
 
 #define SOS_MEMORY_SIZE 16384   /* see src/mi/mempool.c */
 
+#if HAVE_SGX /* Running inside Enclave */
+#define GET_MEMORY(mem, size) do { mem = malloc(size); } while (0)
+#define FREE_MEMORY(mem, size)      \
+do {                                                          \
+  if (mem != NULL)                                  \
+    free(mem);                                          \
+} while (0)
+
+#else
 #ifndef MAP_ANONYMOUS
 # define MAP_ANONYMOUS MAP_ANON
 #endif
@@ -228,6 +247,7 @@ do {                                                                        \
   if (mem == MAP_FAILED)                                                    \
     mem = NULL;                                                             \
 } while (0)
+#endif
 
 #define unwi_find_dynamic_proc_info     UNWI_OBJ(find_dynamic_proc_info)
 #define unwi_extract_dynamic_proc_info  UNWI_OBJ(extract_dynamic_proc_info)
@@ -322,7 +342,7 @@ struct elf_dyn_info
 static inline void invalidate_edi (struct elf_dyn_info *edi)
 {
   if (edi->ei.image)
-    munmap (edi->ei.image, edi->ei.size);
+    FREE_MEMORY (edi->ei.image, edi->ei.size);
   memset (edi, 0, sizeof (*edi));
   edi->di_cache.format = -1;
   edi->di_debug.format = -1;

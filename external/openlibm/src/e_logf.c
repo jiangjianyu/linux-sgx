@@ -16,7 +16,8 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/e_logf.c,v 1.11 2008/03/29 16:37:59 das Exp $");
 
-#include "openlibm.h"
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 static const float
@@ -31,7 +32,7 @@ Lg4 =      0xf89e26.0p-26;	/* 0.24279078841 */
 
 static const float zero   =  0.0;
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ieee754_logf(float x)
 {
 	float hfsq,f,s,z,R,w,t1,t2,dk;

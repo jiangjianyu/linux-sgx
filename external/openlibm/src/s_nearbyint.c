@@ -27,8 +27,9 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_nearbyint.c,v 1.2 2008/01/14 02:12:06 das Exp $");
 
-#include <fenv.h>
-#include <openlibm.h>
+#include <openlibm_fenv.h>
+#include <openlibm_math.h>
+
 #include "math_private.h"
 
 /*
@@ -39,7 +40,7 @@
  * rounding can't overflow as long as emax >= p.
  */
 #define	DECL(type, fn, rint)	\
-DLLEXPORT type				\
+OLM_DLLEXPORT type				\
 fn(type x)			\
 {				\
 	type ret;		\
@@ -53,4 +54,3 @@ fn(type x)			\
 
 DECL(double, nearbyint, rint)
 DECL(float, nearbyintf, rintf)
-DECL(long double, nearbyintl, rintl)

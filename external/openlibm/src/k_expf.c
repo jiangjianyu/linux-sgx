@@ -27,9 +27,9 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/k_expf.c,v 1.1 2011/10/21 06:27:56 das Exp $");
 
-#include <complex.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const u_int32_t k = 235;			/* constant for reduction */
@@ -54,7 +54,7 @@ __frexp_expf(float x, int *expt)
 	return (exp_x);
 }
 
-DLLEXPORT float
+OLM_DLLEXPORT float
 __ldexp_expf(float x, int expt)
 {
 	float exp_x, scale;
@@ -66,7 +66,7 @@ __ldexp_expf(float x, int expt)
 	return (exp_x * scale);
 }
 
-DLLEXPORT float complex
+OLM_DLLEXPORT float complex
 __ldexp_cexpf(float complex z, int expt)
 {
 	float x, y, exp_x, scale1, scale2;
@@ -82,6 +82,6 @@ __ldexp_cexpf(float complex z, int expt)
 	half_expt = expt - half_expt;
 	SET_FLOAT_WORD(scale2, (0x7f + half_expt) << 23);
 
-	return (cpackf(cosf(y) * exp_x * scale1 * scale2,
+	return (CMPLXF(cosf(y) * exp_x * scale1 * scale2,
 	    sinf(y) * exp_x * scale1 * scale2));
 }

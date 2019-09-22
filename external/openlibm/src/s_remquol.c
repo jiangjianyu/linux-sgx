@@ -14,10 +14,10 @@
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_remquol.c,v 1.2 2008/07/31 20:09:47 das Exp $");
 
 #include <float.h>
+#include <openlibm_math.h>
 #include <stdint.h>
 
 #include "fpmath.h"
-#include "openlibm.h"
 #include "math_private.h"
 
 #define	BIAS (LDBL_MAX_EXP - 1)
@@ -64,7 +64,7 @@ static const long double Zero[] = {0.0L, -0.0L};
  * - The high part of the mantissa fits in an int64_t with enough room
  *   for an explicit integer bit in front of the fractional bits.
  */
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 remquol(long double x, long double y, int *quo)
 {
 	union IEEEl2bits ux, uy;

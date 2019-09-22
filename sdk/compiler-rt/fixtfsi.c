@@ -17,7 +17,9 @@
 #include "fp_lib.h"
 
 #if defined(CRT_HAS_128BIT) && defined(CRT_LDBL_128BIT)
-#include "fp_fixsi_impl.inc"
+typedef si_int fixint_t;
+typedef su_int fixuint_t;
+#include "fp_fixint_impl.inc"
 
 COMPILER_RT_ABI int __fixtfsi(fp_t a) {
  return __fixXsi(a);

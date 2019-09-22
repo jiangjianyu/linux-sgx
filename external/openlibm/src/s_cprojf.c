@@ -27,17 +27,17 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/s_cprojf.c,v 1.1 2008/08/07 15:07:48 das Exp $");
 
-#include <complex.h>
-#include <openlibm.h>
+#include <openlibm_complex.h>
+#include <openlibm_math.h>
 
 #include "math_private.h"
 
-DLLEXPORT float complex
+OLM_DLLEXPORT float complex
 cprojf(float complex z)
 {
 
 	if (!isinf(crealf(z)) && !isinf(cimagf(z)))
 		return (z);
 	else
-		return (cpackf(INFINITY, copysignf(0.0, cimagf(z))));
+		return (CMPLXF(INFINITY, copysignf(0.0, cimagf(z))));
 }

@@ -23,13 +23,13 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
-#include "openlibm.h"
 #include "math_private.h"
 
 static const double huge = 1.0e300;
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 trunc(double x)
 {
 	int32_t i0,i1,j0;

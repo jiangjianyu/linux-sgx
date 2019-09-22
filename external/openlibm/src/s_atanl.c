@@ -20,16 +20,16 @@
  */
 
 #include <float.h>
+#include <openlibm_math.h>
 
 #include "invtrig.h"
-#include "openlibm.h"
 #include "math_private.h"
 
 static const long double
 one   = 1.0,
 huge   = 1.0e300;
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 atanl(long double x)
 {
 	union IEEEl2bits u;

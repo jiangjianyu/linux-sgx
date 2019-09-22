@@ -27,11 +27,11 @@
 #include "cdefs-compat.h"
 //__FBSDID("$FreeBSD: src/lib/msun/src/e_sqrtl.c,v 1.1 2008/03/02 01:47:58 das Exp $");
 
-#include <fenv.h>
 #include <float.h>
+#include <openlibm_fenv.h>
+#include <openlibm_math.h>
 
 #include "fpmath.h"
-#include "openlibm.h"
 #include "math_private.h"
 
 /* Return (x + ulp) for normal positive x. Assumes no overflow. */
@@ -75,7 +75,7 @@ dec(long double x)
  * if possible.
  */
 
-DLLEXPORT long double
+OLM_DLLEXPORT long double
 sqrtl(long double x)
 {
 	union IEEEl2bits u;

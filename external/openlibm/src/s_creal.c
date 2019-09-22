@@ -26,10 +26,11 @@
  * $FreeBSD: src/lib/msun/src/s_creal.c,v 1.1 2004/05/30 09:21:56 stefanf Exp $
  */
 
-#include <complex.h>
+#include <openlibm_complex.h>
+
 #include "math_private.h"
 
-DLLEXPORT double
+OLM_DLLEXPORT double
 creal(double complex z)
 {
 	return z;
