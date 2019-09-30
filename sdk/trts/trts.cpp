@@ -27,7 +27,7 @@ sgx_status_t sgx_ocall(const unsigned int index,
 extern "C" {
 
 thread_data_t *get_thread_data(void) {
-    return &thread;
+    return (thread_data_t*)get_enclave_base();
 }
 
 unsigned long __stack_chk_guard = 0xBAAAAAAD;

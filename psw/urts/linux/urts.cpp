@@ -18,6 +18,8 @@ void* lib_fd = 0;
 
 void* enclave_base = 0;
 
+extern int __ENCLAVE_HEAP__;
+
 typedef sgx_status_t (*enclave_entry_t)(sgx_enclave_id_t, const int, const void*, void*);
 
 typedef sgx_status_t (*enclave_init_t)(void* enclave_base, int size, int heap_size, int stack_size, void* ocall_entry);
@@ -39,7 +41,7 @@ sgx_status_t SGXAPI sgx_create_enclave(const char *file_name, const int debug, s
     (void)enclave_id;
     (void)misc_attr;
     
-    int enclave_size = 0x100000;
+    int enclave_size = __ENCLAVE_HEAP__;
     int fd = open("/dev/zero", O_RDWR);
     enclave_base = mmap(0, enclave_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     close(fd);

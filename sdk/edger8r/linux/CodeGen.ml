@@ -1183,7 +1183,7 @@ let gen_tproxy_local_vars (plist: Ast.pdecl list) =
 (* Generate only one ocalloc block required for the trusted proxy. *)
 let gen_ocalloc_block (fname: string) (plist: Ast.pdecl list) =
   let ms_struct_name = mk_ms_struct_name fname in
-  let local_vars_block = sprintf "%s* %s = NULL;" ms_struct_name ms_struct_val in
+  let local_vars_block = sprintf "%s %s_o;\n\t%s* %s = &%s_o;" ms_struct_name ms_struct_val ms_struct_name ms_struct_val ms_struct_val in
   let count_ocalloc_size (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
     ""
     in

@@ -3,6 +3,7 @@
 #include "trts_util.h"
 #include "trts_internal.h"
 #include "sgx_trts_exception.h"
+#include "internal/thread_data.h"
 
 void* enclave_base = NULL;
 void* heap_base = NULL;
@@ -32,11 +33,22 @@ sgx_status_t setup_memory_ocall(void *eb, int size, int heap_size, int stack_siz
         return SGX_ERROR_MEMORY_MAP_CONFLICT;
     }
     enclave_base = eb;
-    heap_base = enclave_base;
+    heap_base = (char*)enclave_base + sizeof(thread_data_t);
+    heap_size -= (int)sizeof(thread_data_t);
     stack_base = (char*)enclave_base + heap_size;
     sgx_ocall_entry = (sgx_ocall_t)ocall_entry;
+
+    thread_data_t *this_thread = (thread_data_t*)enclave_base;
+    this_thread->self_addr = (sys_word_t)enclave_base;
+    this_thread->stack_base_addr = (sys_word_t)stack_base;
+    this_thread->stack_limit_addr = (sys_word_t)((char*)stack_base + stack_size);
+
     enclave_size = size;
     return SGX_SUCCESS;
+}
+
+void* get_enclave_base() {
+    return enclave_base;
 }
 
 int error_internal;
