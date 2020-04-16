@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # dep
-sudo docker build ./ -t uranus-linux-sdk:latest
+sudo docker build ./ -t linux-sgx-uranus:latest
 
 # build
-sudo docker run -i -v ${PWD}:/linux-sgx/:Z uranus-linux-sdk:latest bash -c "cd /linux-sgx/;./download_prebuilt.sh; make clean;make sdk_install_pkg;make psw_install_pkg"
+sudo docker run -i -v ${PWD}:/build/:Z linux-sgx-uranus:latest bash -c "cp /linux-sgx/linux/installer/bin/*.bin /build/"
