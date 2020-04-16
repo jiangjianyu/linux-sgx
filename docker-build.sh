@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # dep
-sudo docker build ./ -t linux-sgx-uranus:latest
+sudo docker build ./ -t jyjiang/linux-sgx:latest
 
 # build
-sudo docker run -i -v ${PWD}:/build/:Z linux-sgx-uranus:latest bash -c "cp /linux-sgx/linux/installer/bin/*.bin /build/"
+sudo docker run -i -v ${PWD}:/build-external/:Z jyjiang/linux-sgx:latest bash -c "cp /build/*.bin /build-external/"
