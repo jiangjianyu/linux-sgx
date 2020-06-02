@@ -43,7 +43,7 @@ sgx_status_t SGXAPI sgx_create_enclave(const char *file_name, const int debug, s
     
     int enclave_size = __ENCLAVE_HEAP__;
     int fd = open("/dev/zero", O_RDWR);
-    enclave_base = mmap(0, enclave_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    enclave_base = mmap(0, enclave_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     close(fd);
 
     // open enclave lib

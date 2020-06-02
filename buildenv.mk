@@ -127,8 +127,12 @@ ifneq (,$(findstring 86,$(UNAME)))
         HOST_ARCH := x86_64
     endif
 else
-    $(info Unknown host CPU arhitecture $(UNAME))
-    $(error Aborting)
+    ifneq (,$(findstring aarch64, $(UNAME)))
+    	HOST_ARCH := aarch64
+    else
+    	$(info Unknown host CPU arhitecture $(UNAME))
+    	$(error Aborting)
+    endif
 endif
 
 BUILD_DIR := $(ROOT_DIR)/build/linux
