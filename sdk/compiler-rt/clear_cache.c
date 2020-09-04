@@ -75,13 +75,13 @@ void __clear_cache(void *start, void *end) {
    * dc & ic instructions must use 64bit registers so we don't use
    * uintptr_t in case this runs in an IPL32 environment.
    */
-  const unsigned int dcache_line_size = 4 << ((ctr_el0 >> 16) & 15);
-  for (uint64_t addr = xstart; addr < xend; addr += dcache_line_size)
+  const unsigned long dcache_line_size = 4 << ((ctr_el0 >> 16) & 15);
+  for (uint64_t addr = xstart & ~(dcache_line_size - 1); addr < xend; addr += dcache_line_size)
     __asm __volatile("dc cvau, %0" :: "r"(addr));
   __asm __volatile("dsb ish");
 
-  const unsigned int icache_line_size = 4 << ((ctr_el0 >> 0) & 15);
-  for (uint64_t addr = xstart; addr < xend; addr += icache_line_size)
+  const unsigned long icache_line_size = 4 << ((ctr_el0 >> 0) & 15);
+  for (uint64_t addr = xstart & ~(icache_line_size - 1); addr < xend; addr += icache_line_size)
     __asm __volatile("ic ivau, %0" :: "r"(addr));
   __asm __volatile("isb sy");
 #else
