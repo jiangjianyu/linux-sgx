@@ -197,7 +197,7 @@ let ms_struct_val = "ms"
 let mk_ms_member_name (pname: string) = "ms_" ^ pname
 let mk_ms_struct_name (fname: string) = "ms_" ^ fname ^ "_t"
 let ms_retval_name = mk_ms_member_name retval_name
-let mk_tbridge_name (fname: string) = "sgx_" ^ fname
+let mk_tbridge_name (fname: string) = "tee_" ^ fname
 let mk_parm_accessor name = sprintf "%s->%s" ms_struct_val (mk_ms_member_name name)
 let mk_tmp_var name = "_tmp_" ^ name
 let mk_len_var name = "_len_" ^ name
@@ -209,7 +209,7 @@ let mk_ubridge_name (file_shortnm: string) (funcname: string) =
   sprintf "%s_%s" file_shortnm funcname
 
 let mk_ubridge_proto (file_shortnm: string) (funcname: string) =
-  sprintf "static sgx_status_t SGX_CDECL %s(void* %s)"
+  sprintf "static TEEC_Result %s(void* %s)"
           (mk_ubridge_name file_shortnm funcname) ms_ptr_name
 
 (* Common macro definitions. *)
@@ -387,7 +387,7 @@ let gen_ecall_table (tfs: Ast.trusted_func list) =
         sprintf "%s\t\t{(void*)(uintptr_t)%s, %d},\n" acc s (bool_to_int b)) "" tbridge_names priv_bits
     in "\t{\n" ^ inner_table ^ "\t}\n"
   in
-    sprintf "SGX_EXTERNC const struct {\n\
+    sprintf "const struct {\n\
 \tsize_t nr_ecall;\n\
 \tstruct {void* ecall_addr; uint8_t is_priv;} ecall_table[%d];\n\
 } %s = {\n\
@@ -435,7 +435,7 @@ let gen_entry_table (ec: enclave_content) =
     else
       ""
   in
-    sprintf "SGX_EXTERNC const struct {\n\
+    sprintf "const struct {\n\
 \tsize_t nr_ocall;\n%s\
 } %s = {\n\
 \t%d,\n\
@@ -452,8 +452,8 @@ let gen_entry_table (ec: enclave_content) =
  *   void bar(float f);
  *
  * will have an untrusted proxy like below:
- *   sgx_status_t foo(int* retval, double d);
- *   sgx_status_t bar(float f);
+ *   TEE_Result foo(int* retval, double d);
+ *   TEE_Result bar(float f);
  *)
 let gen_tproxy_proto (fd: Ast.func_decl) =
   let parm_list =
@@ -465,11 +465,11 @@ let gen_tproxy_proto (fd: Ast.func_decl) =
   in
   let retval_parm_str = gen_parm_retval fd.Ast.rtype in
     if fd.Ast.plist = [] then
-      sprintf "sgx_status_t SGX_CDECL %s(%s)" fd.Ast.fname retval_parm_str
+      sprintf "TEE_Result %s(%s)" fd.Ast.fname retval_parm_str
     else if fd.Ast.rtype = Ast.Void then
-           sprintf "sgx_status_t SGX_CDECL %s(%s)" fd.Ast.fname parm_list
+           sprintf "TEE_Result %s(%s)" fd.Ast.fname parm_list
          else
-           sprintf "sgx_status_t SGX_CDECL %s(%s, %s)" fd.Ast.fname retval_parm_str parm_list
+           sprintf "TEE_Result %s(%s, %s)" fd.Ast.fname retval_parm_str parm_list
 
 (* Generate the function prototype for untrusted proxy in COM style.
  * For example, trusted functions
@@ -477,8 +477,8 @@ let gen_tproxy_proto (fd: Ast.func_decl) =
  *   void bar(float f);
  *
  * will have an untrusted proxy like below:
- *   sgx_status_t foo(sgx_enclave_id_t eid, int* retval, double d);
- *   sgx_status_t foo(sgx_enclave_id_t eid, float f);
+ *   TEE_Result foo(tee_id_t eid, int* retval, double d);
+ *   TEE_Result foo(tee_id_t eid, float f);
  *
  * When `g_use_prefix' is true, the untrusted proxy name is prefixed
  * with the `prefix' parameter.
@@ -488,15 +488,15 @@ let gen_uproxy_com_proto (fd: Ast.func_decl) (prefix: string) =
   let retval_parm_str = gen_parm_retval fd.Ast.rtype in
 
   let eid_parm_str =
-    if fd.Ast.rtype = Ast.Void then sprintf "(sgx_enclave_id_t %s" eid_name
-    else sprintf "(sgx_enclave_id_t %s, " eid_name in
+    if fd.Ast.rtype = Ast.Void then sprintf "(tee_id_t %s" eid_name
+    else sprintf "(tee_id_t %s, " eid_name in
   let parm_list =
     List.fold_left (fun acc pd -> acc ^ ", " ^ gen_parm_str pd)
       retval_parm_str fd.Ast.plist in
   let fname =
     if !g_use_prefix then sprintf "%s_%s" prefix fd.Ast.fname
     else fd.Ast.fname
-  in "sgx_status_t " ^ fname ^ eid_parm_str ^ parm_list ^ ")"
+  in "TEEC_Result " ^ fname ^ eid_parm_str ^ parm_list ^ ")"
 
 let get_ret_tystr (fd: Ast.func_decl) = Ast.get_tystr fd.Ast.rtype
 let get_plist_str (fd: Ast.func_decl) =
@@ -528,7 +528,8 @@ let gen_uheader_preemble (guard: string) (inclist: string)=
 #include <wchar.h>\n\
 #include <stddef.h>\n\
 #include <string.h>\n\
-#include \"sgx_edger8r.h\" /* for sgx_satus_t etc. */\n" in
+#include \"teec_enclave.h\"\n\
+#include \"tee_client_api.h\" /* for sgx_satus_t etc. */\n" in
     grd_hdr ^ inc_exp ^ "\n" ^ inclist ^ "\n" ^ common_macros
 
 let ms_writer out_chan ec =
@@ -567,8 +568,7 @@ let gen_theader_preemble (guard: string) (inclist: string) =
   let grd_hdr = sprintf "#ifndef %s\n#define %s\n\n" guard guard in
   let inc_exp = "#include <stdint.h>\n\
 #include <wchar.h>\n\
-#include <stddef.h>\n\
-#include \"sgx_edger8r.h\" /* for sgx_ocall etc. */\n\n" in
+#include <stddef.h>\n" in
     grd_hdr ^ inc_exp ^ inclist ^ "\n" ^ common_macros
 
 
@@ -686,7 +686,7 @@ let gen_func_ubridge (file_shortnm: string) (ufunc: Ast.untrusted_func) =
   let fd = ufunc.Ast.uf_fdecl in
   let propagate_errno = ufunc.Ast.uf_propagate_errno in
   let func_open = sprintf "%s\n{\n" (mk_ubridge_proto file_shortnm fd.Ast.fname) in
-  let func_close = "\treturn SGX_SUCCESS;\n}\n" in
+  let func_close = "\treturn TEEC_SUCCESS;\n}\n" in
   let set_errno = if propagate_errno then "\tms->ocall_errno = errno;" else "" in
   let ms_struct_name = mk_ms_struct_name fd.Ast.fname in
   let declare_ms_ptr = sprintf "%s* %s = SGX_CAST(%s*, %s);"
@@ -739,35 +739,79 @@ let fill_ms_field (isptr: bool) (pd: Ast.pdecl) =
 let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
   let func_open  =
     gen_uproxy_com_proto fd ec.enclave_name ^
-      "\n{\n\tsgx_status_t status;\n"
+      "\n{\n\tTEEC_Result status;\n\tTEEC_Operation op;\n\tuint32_t ret_orig;\n\tTEEC_SharedMemory input_sm;\n\n"
   in
+  let get_length (ty: Ast.atype) (attr: Ast.ptr_attr) (declr: Ast.declarator) =
+    let name        = declr.Ast.identifier in
+
+    let mk_len_size v =
+      match v with
+        Ast.AString s -> s
+      | Ast.ANumber n -> sprintf "%d" n in
+
+    let size_str =
+      match attr.Ast.pa_size.Ast.ps_size with
+        Some a -> mk_len_size a
+      | None   ->
+        match attr.Ast.pa_size.Ast.ps_sizefunc with
+          None   -> sprintf "sizeof(*%s)" name
+        | Some a -> a
+    in
+      match attr.Ast.pa_size.Ast.ps_count with
+        None   -> size_str
+      | Some a -> sprintf "%s\n\n" (mk_len_size a ^ "*" ^ size_str) in
   let func_close = "\treturn status;\n}\n" in
   let ocall_table_name  = mk_ocall_table_name ec.enclave_name in
   let ms_struct_name  = mk_ms_struct_name fd.Ast.fname in
-  let declare_ms_expr = sprintf "%s %s;" ms_struct_name ms_struct_val in
+  let input_size_base = sprintf "sizeof(%s)" ms_struct_name in
+  let input_size_str = List.fold_left (fun acc (pty, declr) ->
+     match pty with
+         Ast.PTVal _         -> acc
+       | Ast.PTPtr(ty, attr) -> acc ^ " + " ^ get_length ty attr declr) input_size_base fd.Ast.plist
+  in
+  let copy_buffer_struct = List.fold_left (fun (acc, copy_buf) (pty, declr) ->
+      match pty with
+      Ast.PTVal _         -> (acc, copy_buf)
+    | Ast.PTPtr(ty, attr) -> 
+    let total_len = get_length ty attr declr in
+    (acc ^ " + " ^ total_len, copy_buf ^ sprintf "memcpy(input_sm.buffer + %s, %s, %s);\n" acc declr.Ast.identifier total_len)) (input_size_base, "") fd.Ast.plist
+  in
+  let get_first = fun (a, b) -> b in
+  let copy_buffer_str = "\n\t" ^ get_first copy_buffer_struct in
+  let alloc_share_mem = sprintf "input_sm.size = %s;\n\
+                  \tinput_sm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;\n\
+                  \tstatus = TEEC_AllocateSharedMemory(&ctx, &input_sm);\n\
+                  \tif (status != TEEC_SUCCESS) \t{\n\t\treturn status;\n\t}\n\n" input_size_str
+  in
+  let set_share_mem = sprintf "\n\tmemset(&op, 0, sizeof(op));\n\
+                      \top.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_WHOLE, TEEC_NONE, TEEC_NONE, TEEC_NONE);\n\
+                      \top.params[0].memref.parent = &input_sm;\n\
+                      \top.params[0].memref.offset = 0;\n\
+                      \top.params[0].memref.size = sizeof(%s);\n" ms_struct_name in
+  let declare_ms_expr = sprintf "%s* %s = SGX_CAST(%s*, input_sm.buffer);;" ms_struct_name ms_struct_val ms_struct_name in
   let ocall_table_ptr =
     sprintf "&%s" ocall_table_name in
 
   (* Normal case - do ECALL with marshaling structure*)
-  let ecall_with_ms = sprintf "status = sgx_ecall(%s, %d, %s, &%s);"
-                              eid_name idx ocall_table_ptr ms_struct_val in
+  let ecall_with_ms = sprintf "status = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);"
+                              idx in
 
   (* Rare case - the trusted function doesn't have parameter nor return value.
    * In this situation, no marshaling structure is required - passing in NULL.
    *)
-  let ecall_null = sprintf "status = sgx_ecall(%s, %d, %s, NULL);"
-                           eid_name idx ocall_table_ptr
+  let ecall_null = sprintf "status = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);"
+                           idx
   in
-  let update_retval = sprintf "if (status == SGX_SUCCESS && %s) *%s = %s.%s;"
+  let update_retval = sprintf "if (status == TEEC_SUCCESS && %s) *%s = %s->%s;"
                               retval_name retval_name ms_struct_val ms_retval_name in
   let func_body = ref [] in
     if is_naked_func fd then
       sprintf "%s\t%s\n%s" func_open ecall_null func_close
     else
       begin
-        func_body := declare_ms_expr :: !func_body;
-        List.iter (fun pd -> func_body := fill_ms_field false pd :: !func_body) fd.Ast.plist;
-        func_body := ecall_with_ms :: !func_body;
+        func_body := copy_buffer_str :: declare_ms_expr :: alloc_share_mem :: !func_body;
+        List.iter (fun pd -> func_body := fill_ms_field true pd :: !func_body) fd.Ast.plist;
+        func_body := ecall_with_ms :: set_share_mem :: !func_body;
         if fd.Ast.rtype <> Ast.Void then func_body := update_retval :: !func_body;
           List.fold_left (fun acc s -> acc ^ "\t" ^ s ^ "\n") func_open (List.rev !func_body) ^ func_close
       end
@@ -1064,7 +1108,7 @@ let mk_parm_name_tbridge (pt: Ast.parameter_type) (declr: Ast.declarator) =
 
 (* Generate local variables required for the trusted bridge. *)
 let gen_tbridge_local_vars (plist: Ast.pdecl list) =
-  let status_var = "\tsgx_status_t status = SGX_SUCCESS;\n" in
+  let status_var = "\tTEE_Result status = TEE_SUCCESS;\n" in
   let do_gen_local_var (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
     let tmp_var =
       (* Save a copy of pointer in case it might be modified in the marshaling structure. *)
@@ -1109,18 +1153,20 @@ let gen_tbridge_local_vars (plist: Ast.pdecl list) =
 
 (* It generates trusted bridge code for a trusted function. *)
 let gen_func_tbridge (fd: Ast.func_decl) (dummy_var: string) =
-  let func_open = sprintf "static sgx_status_t SGX_CDECL %s(void* %s)\n{\n"
+  let func_open = sprintf "static TEE_Result %s(uint32_t param_types,\n\tTEE_Param params[4])\n{\n"
                           (mk_tbridge_name fd.Ast.fname)
-                          ms_ptr_name in
+                          in
   let local_vars = gen_tbridge_local_vars fd.Ast.plist in
   let func_close = "\treturn status;\n}\n" in
+
+  let unused_variables = "(void)&param_types;" in
 
   let ms_struct_name = mk_ms_struct_name fd.Ast.fname in
   let declare_ms_ptr = sprintf "%s* %s = SGX_CAST(%s*, %s);"
                                ms_struct_name
                                ms_struct_val
                                ms_struct_name
-                               ms_ptr_name in
+                               "params[0].memref.buffer" in
 
   let invoke_func   = gen_func_invoking fd mk_parm_name_tbridge in
   let update_retval = sprintf "%s = %s"
@@ -1133,8 +1179,9 @@ let gen_func_tbridge (fd: Ast.func_decl) (dummy_var: string) =
       in
         sprintf "%s%s%s\t%s\n\t%s\n%s" func_open local_vars dummy_var check_pms invoke_func func_close
     else
-      sprintf "%s\t%s\n%s\n%s%s%s\n%s\t%s\n%s\n%s\n%s"
+      sprintf "%s\t%s\n\t%s\n%s\n%s%s%s\n%s\t%s\n%s\n%s\n%s"
         func_open
+        unused_variables
         declare_ms_ptr
         local_vars
         (gen_check_tbridge_length_overflow fd.Ast.plist)
@@ -1165,7 +1212,7 @@ let tproxy_fill_ms_field (pd: Ast.pdecl) =
 
 (* Generate local variables required for the trusted proxy. *)
 let gen_tproxy_local_vars (plist: Ast.pdecl list) =
-  let status_var = "sgx_status_t status = SGX_SUCCESS;\n" in
+  let status_var = "TEE_Result status = TEE_SUCCESS;\n" in
   let do_gen_local_var (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
     if not attr.Ast.pa_chkptr then ""
     else "\t" ^ gen_ptr_size ty attr name (fun x -> x)
@@ -1263,11 +1310,11 @@ let gen_untrusted_source (ec: enclave_content) =
   let ubridge_list =
     List.map (fun fd -> gen_func_ubridge ec.file_shortnm fd)
       (ec.ufunc_decls) in
-  let out_chan = open_out code_fname in
+  let out_chan = open_out code_fname in 
     output_string out_chan (include_hd ^ include_errno ^ "\n");
     ms_writer out_chan ec;
     List.iter (fun s -> output_string out_chan (s ^ "\n")) ubridge_list;
-    output_string out_chan (gen_ocall_table ec);
+    (* output_string out_chan (gen_ocall_table ec); *)
     List.iter (fun s -> output_string out_chan (s ^ "\n")) uproxy_list;
     close_out out_chan
 
@@ -1275,21 +1322,35 @@ let gen_untrusted_source (ec: enclave_content) =
 let gen_trusted_source (ec: enclave_content) =
   let code_fname = get_tsource_name ec.file_shortnm in
   let include_hd = "#include \"" ^ get_theader_short_name ec.file_shortnm ^ "\"\n\n\
-#include \"sgx_trts.h\" /* for sgx_ocalloc, sgx_is_outside_enclave */\n\n\
-#include <errno.h>\n\
+#include \"tee_internal_api.h\"\n\n\
+#include \"tee_internal_api_extensions.h\"\n\n\
 #include <string.h> /* for memcpy etc */\n\
-#include <stdlib.h> /* for malloc/free etc */\n\
+#include <stdlib.h> /* for malloc/free etc */\n\n\
+typedef TEE_Result (*ecall_invoke_entry) (uint32_t, TEE_Param[4]);\n\n\
+TEE_Result TA_CreateEntryPoint(void) { return TEE_SUCCESS; }\n\n\
+void TA_DestroyEntryPoint(void) {}\n\n\
+TEE_Result TA_OpenSessionEntryPoint(uint32_t param_types,\n\
+\tTEE_Param __maybe_unused params[4],\n\
+\tvoid __maybe_unused **sess_ctx) {\n\
+\t/* Unused parameters */\n\
+\t(void)&param_types;\n\
+\t(void)&params;\n\
+\t(void)&sess_ctx;\n\
+\treturn TEE_SUCCESS;\n\
+}\n\n\
+void TA_CloseSessionEntryPoint(void __maybe_unused *sess_ctx) { \n\
+\t(void)&sess_ctx; /* Unused parameter */ \n\
+} \n\
 \n\
-#define CHECK_REF_POINTER(ptr, siz) do {\t\\\n\
-\tif (!(ptr) || ! sgx_is_outside_enclave((ptr), (siz)))\t\\\n\
-\t\treturn SGX_ERROR_INVALID_PARAMETER;\\\n\
-} while (0)\n\
-\n\
-#define CHECK_UNIQUE_POINTER(ptr, siz) do {\t\\\n\
-\tif ((ptr) && ! sgx_is_outside_enclave((ptr), (siz)))\t\\\n\
-\t\treturn SGX_ERROR_INVALID_PARAMETER;\\\n\
-} while (0)\n\
 \n" in
+  let invoke_table = "\nTEE_Result TA_InvokeCommandEntryPoint(void __maybe_unused *sess_ctx,\n\
+  \tuint32_t cmd_id,\n\
+  \tuint32_t param_types, TEE_Param params[4])\n\
+  {\n\
+  \t(void)&sess_ctx; /* Unused parameter */\n\
+  \tecall_invoke_entry entry = SGX_CAST(ecall_invoke_entry, g_ecall_table.ecall_table[cmd_id].ecall_addr);\n\
+  \treturn (*entry)(param_types, params);\n\
+  }\n" in
   let trusted_fds = tf_list_to_fd_list ec.tfunc_decls in
   let tbridge_list =
     let dummy_var = tbridge_gen_dummy_variable ec in
@@ -1308,6 +1369,7 @@ let gen_trusted_source (ec: enclave_content) =
     output_string out_chan (entry_table ^ "\n");
     output_string out_chan "\n";
     List.iter (fun s -> output_string out_chan (s ^ "\n")) tproxy_list;
+    output_string out_chan invoke_table;
     close_out out_chan
 
 (* We use a stack to keep record of imported files.
