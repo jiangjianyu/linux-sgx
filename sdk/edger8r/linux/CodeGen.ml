@@ -204,6 +204,29 @@ let mk_len_var name = "_len_" ^ name
 let mk_in_var name = "_in_" ^ name
 let mk_ocall_table_name enclave_name = "ocall_table_" ^ enclave_name
 
+let get_ptr_length (ty: Ast.atype) (attr: Ast.ptr_attr) (declr: Ast.declarator) (is_tmp: bool) =
+  let name        = declr.Ast.identifier in
+  let mk_size_var = if is_tmp then (fun x -> mk_tmp_var x) else fun x -> x in
+
+  let mk_len_size v =
+    match v with
+      Ast.AString s -> s
+    | Ast.ANumber n -> sprintf "%d" n in
+
+  let size_str =
+    match attr.Ast.pa_size.Ast.ps_size with
+      Some a -> mk_len_size a
+    | None   ->
+      match attr.Ast.pa_size.Ast.ps_sizefunc with
+        None   -> sprintf "sizeof(*%s)" name
+      | Some a -> a
+  in
+    match attr.Ast.pa_size.Ast.ps_count with
+      None   -> mk_size_var size_str
+    | Some a -> sprintf "%s\n\n" (mk_len_size a ^ "*" ^ mk_size_var size_str)
+
+let get_first = fun (a, b) -> b
+
 (* Un-trusted bridge name is prefixed with enclave file short name. *)
 let mk_ubridge_name (file_shortnm: string) (funcname: string) =
   sprintf "%s_%s" file_shortnm funcname
@@ -518,8 +541,8 @@ let gen_ufunc_proto (uf: Ast.untrusted_func) =
   let cconv_str = "SGX_" ^ Ast.get_call_conv_str uf.Ast.uf_fattr.Ast.fa_convention in
   let func_name = uf.Ast.uf_fdecl.Ast.fname in
   let plist_str = get_plist_str uf.Ast.uf_fdecl in
-    sprintf "%s%s SGX_UBRIDGE(%s, %s, (%s))"
-            dllimport ret_tystr cconv_str func_name plist_str
+    sprintf "%s%s %s (%s)"
+            dllimport ret_tystr func_name plist_str
 
 (* The preemble contains common include expressions. *)
 let gen_uheader_preemble (guard: string) (inclist: string)=
@@ -568,7 +591,9 @@ let gen_theader_preemble (guard: string) (inclist: string) =
   let grd_hdr = sprintf "#ifndef %s\n#define %s\n\n" guard guard in
   let inc_exp = "#include <stdint.h>\n\
 #include <wchar.h>\n\
-#include <stddef.h>\n" in
+#include <stddef.h>\n
+#include \"tee_internal_api.h\"\n\
+" in
     grd_hdr ^ inc_exp ^ inclist ^ "\n" ^ common_macros
 
 
@@ -694,6 +719,12 @@ let gen_func_ubridge (file_shortnm: string) (ufunc: Ast.untrusted_func) =
                                ms_struct_val
                                ms_struct_name
                                ms_ptr_name in
+  let input_size_base = sprintf " + sizeof(%s)" ms_struct_name in
+  let rewrite_buffer = List.fold_left(fun (acc, rewrite_buf) (pty, declr) ->
+   match pty with
+       Ast.PTVal _         -> (acc, rewrite_buf)
+     | Ast.PTPtr(ty, attr) -> (acc ^ " + " ^ get_ptr_length ty attr declr false, rewrite_buf ^ sprintf "\tms->ms_%s = pms%s;\n" declr.Ast.identifier acc)) (input_size_base, "") fd.Ast.plist
+  in
   let call_with_pms =
     let invoke_func = gen_func_invoking fd mk_parm_name_ubridge in
       if fd.Ast.rtype = Ast.Void then invoke_func
@@ -703,9 +734,9 @@ let gen_func_ubridge (file_shortnm: string) (ufunc: Ast.untrusted_func) =
       let check_pms =
         sprintf "if (%s != NULL) return SGX_ERROR_INVALID_PARAMETER;" ms_ptr_name
       in
-        sprintf "%s\t%s\n\t%s\n%s" func_open check_pms call_with_pms func_close
+        sprintf "%s\t%s\n%s\n\t%s\n%s" func_open check_pms (get_first rewrite_buffer) call_with_pms func_close
       else
-        sprintf "%s\t%s\n\t%s\n%s\n%s" func_open declare_ms_ptr call_with_pms set_errno func_close
+        sprintf "%s\t%s\n%s\n\t%s\n%s\n%s" func_open declare_ms_ptr (get_first rewrite_buffer) call_with_pms set_errno func_close
 
 let fill_ms_field (isptr: bool) (pd: Ast.pdecl) =
   let accessor       = if isptr then "->" else "." in
@@ -739,27 +770,8 @@ let fill_ms_field (isptr: bool) (pd: Ast.pdecl) =
 let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
   let func_open  =
     gen_uproxy_com_proto fd ec.enclave_name ^
-      "\n{\n\tTEEC_Result status;\n\tTEEC_Operation op;\n\tuint32_t ret_orig;\n\tTEEC_SharedMemory input_sm;\n\n"
+      "\n{\n\tTEEC_Result status;\n\tTEEC_Operation op;\n\tuint32_t ret_orig;\n\tTEEC_SharedMemory input_sm;\n\tTEEC_SharedMemory output_sm;\n\n"
   in
-  let get_length (ty: Ast.atype) (attr: Ast.ptr_attr) (declr: Ast.declarator) =
-    let name        = declr.Ast.identifier in
-
-    let mk_len_size v =
-      match v with
-        Ast.AString s -> s
-      | Ast.ANumber n -> sprintf "%d" n in
-
-    let size_str =
-      match attr.Ast.pa_size.Ast.ps_size with
-        Some a -> mk_len_size a
-      | None   ->
-        match attr.Ast.pa_size.Ast.ps_sizefunc with
-          None   -> sprintf "sizeof(*%s)" name
-        | Some a -> a
-    in
-      match attr.Ast.pa_size.Ast.ps_count with
-        None   -> size_str
-      | Some a -> sprintf "%s\n\n" (mk_len_size a ^ "*" ^ size_str) in
   let func_close = "\treturn status;\n}\n" in
   let ocall_table_name  = mk_ocall_table_name ec.enclave_name in
   let ms_struct_name  = mk_ms_struct_name fd.Ast.fname in
@@ -767,43 +779,62 @@ let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
   let input_size_str = List.fold_left (fun acc (pty, declr) ->
      match pty with
          Ast.PTVal _         -> acc
-       | Ast.PTPtr(ty, attr) -> acc ^ " + " ^ get_length ty attr declr) input_size_base fd.Ast.plist
+       | Ast.PTPtr(ty, attr) -> acc ^ " + " ^ get_ptr_length ty attr declr false) input_size_base fd.Ast.plist
   in
   let copy_buffer_struct = List.fold_left (fun (acc, copy_buf) (pty, declr) ->
       match pty with
       Ast.PTVal _         -> (acc, copy_buf)
     | Ast.PTPtr(ty, attr) -> 
-    let total_len = get_length ty attr declr in
-    (acc ^ " + " ^ total_len, copy_buf ^ sprintf "memcpy(input_sm.buffer + %s, %s, %s);\n" acc declr.Ast.identifier total_len)) (input_size_base, "") fd.Ast.plist
+    let total_len = get_ptr_length ty attr declr false in
+    (acc ^ " + " ^ total_len, copy_buf ^ sprintf "\tmemcpy(input_sm.buffer + %s, %s, %s);\n" acc declr.Ast.identifier total_len)) (input_size_base, "") fd.Ast.plist
   in
-  let get_first = fun (a, b) -> b in
-  let copy_buffer_str = "\n\t" ^ get_first copy_buffer_struct in
+  let copy_buffer_out_struct = List.fold_left (fun (acc, copy_buf) (pty, declr) ->
+     match pty with
+     Ast.PTVal _         -> (acc, copy_buf)
+   | Ast.PTPtr(ty, attr) ->
+   let total_len = get_ptr_length ty attr declr false in
+     match attr.pa_direction with
+     Ast.PtrInOut | Ast.PtrOut ->
+   (acc ^ " + " ^ total_len, copy_buf ^ sprintf "\t\tmemcpy(%s, input_sm.buffer + %s, %s);\n" declr.Ast.identifier acc total_len)
+   | _ -> (acc ^ " + " ^ total_len, copy_buf)) (input_size_base, "") fd.Ast.plist
+  in
+  let copy_buffer_str = "\n" ^ get_first copy_buffer_struct in
+  let copy_buffer_out_str = "\n" ^ get_first copy_buffer_out_struct in
   let alloc_share_mem = sprintf "input_sm.size = %s;\n\
                   \tinput_sm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;\n\
+                  \toutput_sm.size = 10240;\n\
+                  \toutput_sm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;\n\
                   \tstatus = TEEC_AllocateSharedMemory(&ctx, &input_sm);\n\
-                  \tif (status != TEEC_SUCCESS) \t{\n\t\treturn status;\n\t}\n\n" input_size_str
+                  \tif (status != TEEC_SUCCESS) \t{\n\t\treturn status;\n\t}\n\
+                  \tstatus = TEEC_AllocateSharedMemory(&ctx, &output_sm);\n\
+                  \tif (status != TEEC_SUCCESS) \t{\n\t\treturn status;\n\t}\n\n"
+                  input_size_str
   in
   let set_share_mem = sprintf "\n\tmemset(&op, 0, sizeof(op));\n\
                       \top.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_WHOLE, TEEC_NONE, TEEC_NONE, TEEC_NONE);\n\
                       \top.params[0].memref.parent = &input_sm;\n\
                       \top.params[0].memref.offset = 0;\n\
-                      \top.params[0].memref.size = sizeof(%s);\n" ms_struct_name in
+                      \top.params[0].memref.size = %s;\n\
+                      \top.params[1].memref.parent = &output_sm;\n\
+                      \top.params[1].memref.offset = 0;\n\
+                      \top.params[1].memref.size = 10240;\n" input_size_str in
   let declare_ms_expr = sprintf "%s* %s = SGX_CAST(%s*, input_sm.buffer);;" ms_struct_name ms_struct_val ms_struct_name in
   let ocall_table_ptr =
     sprintf "&%s" ocall_table_name in
 
   (* Normal case - do ECALL with marshaling structure*)
-  let ecall_with_ms = sprintf "status = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);"
+  let ecall_with_ms = sprintf "ocall_add(output_sm.buffer, ocall_table_hello_world.table);\n\tstatus = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n\tocall_del(output_sm.buffer);"
                               idx in
 
   (* Rare case - the trusted function doesn't have parameter nor return value.
    * In this situation, no marshaling structure is required - passing in NULL.
    *)
-  let ecall_null = sprintf "status = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);"
+  let ecall_null = sprintf "ocall_add(output_sm.buffer, ocall_table_hello_world.table);\n\tstatus = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n\tocall_del(output_sm.buffer);"
                            idx
   in
-  let update_retval = sprintf "if (status == TEEC_SUCCESS && %s) *%s = %s->%s;"
-                              retval_name retval_name ms_struct_val ms_retval_name in
+  let update_retval = sprintf "if (status == TEEC_SUCCESS && %s) {\n\t\t*%s = %s->%s;%s\t}"
+                              retval_name retval_name ms_struct_val ms_retval_name copy_buffer_out_str in
+  let update_outval = sprintf "if (status == TEEC_SUCCESS) {%s\t}" copy_buffer_out_str  in
   let func_body = ref [] in
     if is_naked_func fd then
       sprintf "%s\t%s\n%s" func_open ecall_null func_close
@@ -812,7 +843,7 @@ let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
         func_body := copy_buffer_str :: declare_ms_expr :: alloc_share_mem :: !func_body;
         List.iter (fun pd -> func_body := fill_ms_field true pd :: !func_body) fd.Ast.plist;
         func_body := ecall_with_ms :: set_share_mem :: !func_body;
-        if fd.Ast.rtype <> Ast.Void then func_body := update_retval :: !func_body;
+        if fd.Ast.rtype <> Ast.Void then func_body := update_retval :: !func_body else func_body := update_outval :: !func_body;
           List.fold_left (fun acc s -> acc ^ "\t" ^ s ^ "\n") func_open (List.rev !func_body) ^ func_close
       end
 
@@ -972,7 +1003,7 @@ let gen_parm_ptr_direction_pre (plist: Ast.pdecl list) =
               sprintf "if (%s != NULL) {" tmp_ptr_name;
               sprintf "\t%s = (%s)malloc(%s);" in_ptr_name in_ptr_type len_var;
               sprintf "\tif (%s == NULL) {" in_ptr_name;
-              "\t\tstatus = SGX_ERROR_OUT_OF_MEMORY;";
+              "\t\tstatus = TEE_ERROR_OUT_OF_MEMORY;";
               "\t\tgoto err;";
               "\t}\n";
               sprintf "\tmemcpy(%s, %s, %s);" in_ptr_dst_name tmp_ptr_name len_var;
@@ -994,7 +1025,7 @@ let gen_parm_ptr_direction_pre (plist: Ast.pdecl list) =
             let code_template = [
               sprintf "if (%s != NULL) {" tmp_ptr_name;
               sprintf "\tif ((%s = (%s)malloc(%s)) == NULL) {" in_ptr_name in_ptr_type len_var;
-              "\t\tstatus = SGX_ERROR_OUT_OF_MEMORY;";
+              "\t\tstatus = TEE_ERROR_OUT_OF_MEMORY;";
               "\t\tgoto err;";
               "\t}\n";
               sprintf "\tmemset((void*)%s, 0, %s);" in_ptr_name len_var;
@@ -1109,10 +1140,10 @@ let mk_parm_name_tbridge (pt: Ast.parameter_type) (declr: Ast.declarator) =
 (* Generate local variables required for the trusted bridge. *)
 let gen_tbridge_local_vars (plist: Ast.pdecl list) =
   let status_var = "\tTEE_Result status = TEE_SUCCESS;\n" in
-  let do_gen_local_var (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
+  let do_gen_local_var (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) (offset: string) =
     let tmp_var =
       (* Save a copy of pointer in case it might be modified in the marshaling structure. *)
-      sprintf "\t%s %s = %s;\n" (Ast.get_tystr ty) (mk_tmp_var name) (mk_parm_accessor name)
+      sprintf "\t%s %s = buffer_start + %s;\n" (Ast.get_tystr ty) (mk_tmp_var name) offset
     in
     let len_var =
       if not attr.Ast.pa_chkptr then ""
@@ -1122,7 +1153,7 @@ let gen_tbridge_local_vars (plist: Ast.pdecl list) =
       Ast.PtrNoDirection -> ""
     | _ -> sprintf "\t%s %s = NULL;\n" (Ast.get_tystr ty) (mk_in_var name)
     in
-      tmp_var ^ len_var ^ in_ptr
+      len_var ^ tmp_var ^ in_ptr
   in
   let gen_local_var_for_foreign_array (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
     let tystr = Ast.get_tystr ty in
@@ -1137,19 +1168,23 @@ let gen_tbridge_local_vars (plist: Ast.pdecl list) =
         Ast.PtrNoDirection -> ""
       | _ -> tmp_var ^ len_var ^ in_ptr
   in
-  let gen_local_var (pd: Ast.pdecl) =
+  let gen_local_var (pd: Ast.pdecl) (offset: string) =
     let (pty, declr) = pd in
       match pty with
       Ast.PTVal _          -> ""
     | Ast.PTPtr (ty, attr) ->
             if is_foreign_array pty
             then gen_local_var_for_foreign_array ty attr declr.Ast.identifier
-            else do_gen_local_var ty attr declr.Ast.identifier
+            else do_gen_local_var ty attr declr.Ast.identifier offset
   in
   let new_param_list = List.map conv_array_to_ptr plist
   in
     Hashtbl.clear param_cache;
-    List.fold_left (fun acc pd -> acc ^ gen_local_var pd) status_var new_param_list
+    get_first (List.fold_left (fun (len, acc) (pty, declr) ->
+      match pty with
+      Ast.PTVal _         -> (len, acc)
+    | Ast.PTPtr(ty, attr) ->
+    (len ^ " + " ^ get_ptr_length ty attr declr true, acc ^ gen_local_var (pty, declr) len)) ("0", status_var) new_param_list)
 
 (* It generates trusted bridge code for a trusted function. *)
 let gen_func_tbridge (fd: Ast.func_decl) (dummy_var: string) =
@@ -1167,7 +1202,7 @@ let gen_func_tbridge (fd: Ast.func_decl) (dummy_var: string) =
                                ms_struct_val
                                ms_struct_name
                                "params[0].memref.buffer" in
-
+  let buffer_var_decl = sprintf "\tchar* buffer_start = params[0].memref.buffer + sizeof(%s);\n" ms_struct_name in
   let invoke_func   = gen_func_invoking fd mk_parm_name_tbridge in
   let update_retval = sprintf "%s = %s"
                               (mk_parm_accessor retval_name)
@@ -1179,14 +1214,15 @@ let gen_func_tbridge (fd: Ast.func_decl) (dummy_var: string) =
       in
         sprintf "%s%s%s\t%s\n\t%s\n%s" func_open local_vars dummy_var check_pms invoke_func func_close
     else
-      sprintf "%s\t%s\n\t%s\n%s\n%s%s%s\n%s\t%s\n%s\n%s\n%s"
+      sprintf "%s\t%s\n\t%s\n%s\n%s\n%s%s\n%s\t%s\n%s\n%s\n%s"
         func_open
         unused_variables
         declare_ms_ptr
+        buffer_var_decl
         local_vars
         (gen_check_tbridge_length_overflow fd.Ast.plist)
         (mk_check_pms fd.Ast.fname)
-        (gen_check_tbridge_ptr_parms fd.Ast.plist)
+(*        (gen_check_tbridge_ptr_parms fd.Ast.plist)*)
         (gen_parm_ptr_direction_pre fd.Ast.plist)
         (if fd.Ast.rtype <> Ast.Void then update_retval else invoke_func)
         (gen_err_mark fd.Ast.plist)
@@ -1208,7 +1244,36 @@ let tproxy_fill_ms_field (pd: Ast.pdecl) =
                __FUNCTION__ \"' is dangerous. No code generated.\")\n" name
           else
             let in_ptr_dst_name = mk_in_ptr_dst_name attr.Ast.pa_rdonly parm_accessor in
-              sprintf "%s = SGX_CAST(%s, %s);" parm_accessor tystr name
+              if not attr.Ast.pa_chkptr (* [user_check] specified *)
+              then sprintf "%s = SGX_CAST(%s, %s);" parm_accessor tystr name
+              else
+                match attr.Ast.pa_direction with
+                  Ast.PtrOut ->
+                    let code_template =
+                      [sprintf "if (%s != NULL) {" name;
+                       sprintf "\t%s = (%s)__tmp;" parm_accessor tystr;
+                       sprintf "\t__tmp = (void *)((size_t)__tmp + %s);" len_var;
+                       sprintf "\tmemset(%s, 0, %s);" in_ptr_dst_name len_var;
+                       sprintf "} else if (%s == NULL) {" name;
+                       sprintf "\t%s = NULL;" parm_accessor;
+                       "} else {";
+                       "\treturn TEE_ERROR_BAD_PARAMETERS;";
+                       "}"
+                      ]
+                    in List.fold_left (fun acc s -> acc ^ s ^ "\n\t") "" code_template
+                | _ ->
+                    let code_template =
+              [sprintf "if (%s != NULL) {" name;
+               sprintf "\t%s = (%s)__tmp;" parm_accessor tystr;
+               sprintf "\t__tmp = (void *)((size_t)__tmp + %s);" len_var;
+               sprintf "\tmemcpy(%s, %s, %s);" in_ptr_dst_name name len_var;
+               sprintf "} else if (%s == NULL) {" name;
+               sprintf "\t%s = NULL;" parm_accessor;
+               "} else {";
+               "\treturn TEE_ERROR_BAD_PARAMETERS;";
+               "}"
+              ]
+              in List.fold_left (fun acc s -> acc ^ s ^ "\n\t") "" code_template
 
 (* Generate local variables required for the trusted proxy. *)
 let gen_tproxy_local_vars (plist: Ast.pdecl list) =
@@ -1230,15 +1295,27 @@ let gen_tproxy_local_vars (plist: Ast.pdecl list) =
 (* Generate only one ocalloc block required for the trusted proxy. *)
 let gen_ocalloc_block (fname: string) (plist: Ast.pdecl list) =
   let ms_struct_name = mk_ms_struct_name fname in
-  let local_vars_block = sprintf "%s %s_o;\n\t%s* %s = &%s_o;" ms_struct_name ms_struct_val ms_struct_name ms_struct_val ms_struct_val in
+  let local_vars_block = sprintf "%s* %s = NULL;\n\tsize_t ocalloc_size = sizeof(%s);\n\tvoid *__tmp = NULL;\n\tint* ocall_id;\n\tchar* ocall_status;\n\n" ms_struct_name ms_struct_val ms_struct_name in
   let count_ocalloc_size (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
-    ""
+    if not attr.Ast.pa_chkptr then ""
+    else sprintf "\tocalloc_size += (%s != NULL) ? %s : 0;\n" name (mk_len_var name)
     in
   let do_count_ocalloc_size (pd: Ast.pdecl) =
-    ""
+    let (pty, declr) = pd in
+      match pty with
+        Ast.PTVal _          -> ""
+      | Ast.PTPtr (ty, attr) -> count_ocalloc_size ty attr declr.Ast.identifier
   in
   let do_gen_ocalloc_block = [
-      ]
+       "\n\tocall_status = ocall_param.memref.buffer;";
+       "\n\tocall_id = ocall_param.memref.buffer + sizeof(char);";
+       "\n\t__tmp = ocall_param.memref.buffer + sizeof(int) + sizeof(char);\n";
+       "\tif (__tmp == NULL) {\n";
+       "\t\treturn TEE_ERROR_BAD_STATE;\n";
+       "\t}\n";
+       sprintf "\t%s = (%s*)__tmp;\n" ms_struct_val ms_struct_name;
+       sprintf "\t__tmp = (void *)((size_t)__tmp + sizeof(%s));\n" ms_struct_name;
+     ]
   in
   let new_param_list = List.map conv_array_to_ptr plist
   in
@@ -1255,20 +1332,18 @@ let gen_func_tproxy (ufunc: Ast.untrusted_func) (idx: int) =
 
   let set_errno = if propagate_errno then "\terrno = ms->ocall_errno;" else "" in
   let func_close = sprintf "\treturn status;\n}" in
-  let ocall_null = sprintf "status = sgx_ocall(%d, NULL);\n" idx in
-  let ocall_with_ms = sprintf "status = sgx_ocall(%d, %s);\n"
-                              idx ms_struct_val in
+  let do_ocall = sprintf "*ocall_id = %d;\n\tstatus = tee_ocall(ocall_status);\n" idx in
   let update_retval = sprintf "if (%s) *%s = %s;"
                               retval_name retval_name (mk_parm_accessor retval_name) in
   let func_body = ref [] in
     if (is_naked_func fd) && (propagate_errno = false) then
-        sprintf "%s\t%s\t%s%s" func_open local_vars ocall_null func_close
+        sprintf "%s\t%s\t%s%s" func_open local_vars do_ocall func_close
     else
       begin
         func_body := local_vars :: !func_body;
         func_body := ocalloc_ms_struct:: !func_body;
         List.iter (fun pd -> func_body := tproxy_fill_ms_field pd :: !func_body) fd.Ast.plist;
-        func_body := ocall_with_ms :: !func_body;
+        func_body := do_ocall :: !func_body;
         if fd.Ast.rtype <> Ast.Void then func_body := update_retval :: !func_body;
         List.fold_left (fun acc s -> acc ^ "\t" ^ s ^ "\n") func_open (List.rev !func_body) ^ func_close
       end
@@ -1314,7 +1389,7 @@ let gen_untrusted_source (ec: enclave_content) =
     output_string out_chan (include_hd ^ include_errno ^ "\n");
     ms_writer out_chan ec;
     List.iter (fun s -> output_string out_chan (s ^ "\n")) ubridge_list;
-    (* output_string out_chan (gen_ocall_table ec); *)
+    output_string out_chan (gen_ocall_table ec);
     List.iter (fun s -> output_string out_chan (s ^ "\n")) uproxy_list;
     close_out out_chan
 
@@ -1322,11 +1397,13 @@ let gen_untrusted_source (ec: enclave_content) =
 let gen_trusted_source (ec: enclave_content) =
   let code_fname = get_tsource_name ec.file_shortnm in
   let include_hd = "#include \"" ^ get_theader_short_name ec.file_shortnm ^ "\"\n\n\
-#include \"tee_internal_api.h\"\n\n\
-#include \"tee_internal_api_extensions.h\"\n\n\
+#include \"tee_internal_api.h\"\n\
+#include \"tee_internal_api_extensions.h\"\n\
+#include \"tee_enclave.h\"\n\
 #include <string.h> /* for memcpy etc */\n\
 #include <stdlib.h> /* for malloc/free etc */\n\n\
 typedef TEE_Result (*ecall_invoke_entry) (uint32_t, TEE_Param[4]);\n\n\
+TEE_Param ocall_param;\n\n\
 TEE_Result TA_CreateEntryPoint(void) { return TEE_SUCCESS; }\n\n\
 void TA_DestroyEntryPoint(void) {}\n\n\
 TEE_Result TA_OpenSessionEntryPoint(uint32_t param_types,\n\
@@ -1348,6 +1425,7 @@ void TA_CloseSessionEntryPoint(void __maybe_unused *sess_ctx) { \n\
   \tuint32_t param_types, TEE_Param params[4])\n\
   {\n\
   \t(void)&sess_ctx; /* Unused parameter */\n\
+  \tocall_param = params[1];\n\
   \tecall_invoke_entry entry = SGX_CAST(ecall_invoke_entry, g_ecall_table.ecall_table[cmd_id].ecall_addr);\n\
   \treturn (*entry)(param_types, params);\n\
   }\n" in
