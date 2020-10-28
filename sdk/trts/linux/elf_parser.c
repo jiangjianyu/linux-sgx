@@ -456,7 +456,7 @@ void* func_addr(const void* enclave_base, const char* func) {
         {
             size_t      count;
             size_t      n_dyn = phdr->p_filesz/sizeof(ElfW(Dyn));
-            ElfW(Dyn)   *dyn = GET_PTR(ElfW(Dyn), ehdr, phdr->p_offset);
+            ElfW(Dyn)   *dyn = GET_PTR(ElfW(Dyn), ehdr, phdr->p_paddr);
 
             for (count = 0; count < n_dyn; count++, dyn++)
             {
@@ -497,7 +497,7 @@ void* func_addr(const void* enclave_base, const char* func) {
     const uint32_t* chain =  &bucket[nbucket];
     uint32_t i = bucket[hash % nbucket];
     if (i == STN_UNDEF) {
-        return (void*)(strtab + symtab[0].st_name);
+        return NULL;
     }
 
     for (; i != STN_UNDEF; i = chain[i]) {
