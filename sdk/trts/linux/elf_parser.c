@@ -518,3 +518,79 @@ void* func_addr(const void* enclave_base, const char* func) {
     return NULL;
 }
 /* vim: set ts=4 sw=4 et cin: */
+
+void* func_name(const void* addr) {
+    char* enclave_base = get_enclave_base();
+    const void* found_name = NULL;
+    ElfW(Half) phnum = 0;
+    ElfW(Ehdr) *ehdr = (ElfW(Ehdr)*)enclave_base;
+    ElfW(Phdr) *phdr = get_phdr(ehdr);
+
+    if (ehdr == NULL)
+        return (void*)(-2);  /* Invalid image. */
+
+    ElfW(Addr)   sym_offset     = 0;
+    ElfW(Addr)   str_offset     = 0;
+    ElfW(Addr)   hash_offset    = 0;
+
+    for (; phnum < ehdr->e_phnum; phnum++, phdr++)
+    {
+        /* Search for dynamic segment */
+        if (phdr->p_type == PT_DYNAMIC)
+        {
+            size_t      count;
+            size_t      n_dyn = phdr->p_filesz/sizeof(ElfW(Dyn));
+            ElfW(Dyn)   *dyn = GET_PTR(ElfW(Dyn), ehdr, phdr->p_paddr);
+
+            for (count = 0; count < n_dyn; count++, dyn++)
+            {
+                if (dyn->d_tag == DT_NULL)  /* End */
+                    break;
+
+                switch (dyn->d_tag)
+                {
+                    case DT_SYMTAB: /* symbol table */
+                        sym_offset = dyn->d_un.d_ptr;
+                        break;
+
+                    case DT_HASH:/* Rel (x86) or Rela (x64) relocs */
+                        hash_offset = dyn->d_un.d_ptr;
+                        break;
+
+                    case DT_STRTAB:
+                        str_offset = dyn->d_un.d_val;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+
+    if (!sym_offset || !str_offset || !hash_offset) return (NULL);
+
+    const char* strtab = (char*)((uintptr_t)enclave_base + str_offset);      /* string table */
+    const Elf_Sym* symtab = (Elf_Sym*)((uintptr_t)enclave_base + sym_offset);   /* symbol table */
+
+    const ElfW(Sym) *matchsym;
+    for (matchsym = NULL; (void *) symtab < (void *) strtab; ++symtab) {
+        if (addr >= (const void*)(enclave_base + symtab->st_value) && 
+        (!matchsym || matchsym->st_value < symtab->st_value) &&
+        (ELFW(ST_BIND) (symtab->st_info) == STB_GLOBAL ||
+        ELFW(ST_BIND) (symtab->st_info) == STB_LOCAL ||
+        ELFW(ST_BIND) (symtab->st_info) == STB_WEAK))
+            matchsym = symtab;
+    }
+    if (matchsym)
+    {
+        /* We found a symbol close by.  Fill in its name and exact address.  */
+        found_name = strtab + matchsym->st_name;
+    }
+    else
+    {
+    /* No symbol matches.  We return only the containing object.  */
+    }
+    
+    return (void*)found_name;
+}

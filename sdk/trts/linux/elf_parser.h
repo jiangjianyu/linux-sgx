@@ -53,6 +53,7 @@ int elf_tls_info(const void* enclave_base,
 int elf_get_init_array(const void* enclave_base,
         uintptr_t *init_array_addr, size_t *init_array_size);
 void* func_addr(const void* addr, const char* func);
+void* func_name(const void* addr);
 #ifdef __cplusplus
 }
 #endif

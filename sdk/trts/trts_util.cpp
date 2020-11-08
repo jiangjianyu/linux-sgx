@@ -77,3 +77,7 @@ void* get_function(const char* func) {
 void* get_function_from(const void* from, const char* func) {
     return func_addr(from, func);
 }
+
+void* get_addr_name(const char* addr) {
+    return func_name(addr);
+}

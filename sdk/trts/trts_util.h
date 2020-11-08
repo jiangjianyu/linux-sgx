@@ -48,7 +48,7 @@ bool is_stack_addr(void *address, size_t size);
 bool is_valid_sp(uintptr_t sp);
 void* get_function(const char*);
 void* get_function_from(const void*, const char*);
-
+void* get_addr_name(const char*);
 #ifdef __cplusplus
 }
 #endif
