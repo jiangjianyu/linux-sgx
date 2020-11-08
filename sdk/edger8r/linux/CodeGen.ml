@@ -202,7 +202,7 @@ let mk_parm_accessor name = sprintf "%s->%s" ms_struct_val (mk_ms_member_name na
 let mk_tmp_var name = "_tmp_" ^ name
 let mk_len_var name = "_len_" ^ name
 let mk_in_var name = "_in_" ^ name
-let mk_ocall_table_name enclave_name = "ocall_table_" ^ enclave_name
+let mk_ocall_table_name enclave_name = "ocall_table_enclave"
 
 (* Un-trusted bridge name is prefixed with enclave file short name. *)
 let mk_ubridge_name (file_shortnm: string) (funcname: string) =
@@ -1240,7 +1240,7 @@ let gen_ocall_table (ec: enclave_content) =
         (fun acc proto -> acc ^ "\t\t(void*)" ^ proto ^ ",\n") "" func_proto_ubridge
     in "\t{\n" ^ ocall_members ^ "\t}\n"
   in
-    sprintf "static const struct {\n\
+    sprintf "const struct {\n\
 \tsize_t nr_ocall;\n\
 \tvoid * table[%d];\n\
 } %s = {\n\

@@ -76,6 +76,8 @@ void set_enclave_state(int state);
 
 sgx_status_t setup_memory_ocall(void *enclave_base, int size, int heap_size, int stack_size, void *ocall_entry);
 
+sgx_status_t setup_dl_entry(void *get_func_addr, void *get_addr_name_addr);
+
 sgx_status_t sgx_ecall(const sgx_enclave_id_t enclave_id, const int proc, const void *ocall_table, void *ms);
 
 sgx_status_t sgx_ocall(const unsigned int index, void* ms);

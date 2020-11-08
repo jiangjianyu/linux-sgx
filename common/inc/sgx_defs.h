@@ -50,6 +50,7 @@
 
 # define SGX_DEPRECATED __attribute__((deprecated))
 
+typedef void* (*dl_entry)(const char *func_name);
 
 #define SGX_NOCONVENTION /* Empty.  No calling convention specified. */
 

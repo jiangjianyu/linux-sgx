@@ -23,6 +23,7 @@ extern int __ENCLAVE_HEAP__;
 typedef sgx_status_t (*enclave_entry_t)(sgx_enclave_id_t, const int, const void*, void*);
 
 typedef sgx_status_t (*enclave_init_t)(void* enclave_base, int size, int heap_size, int stack_size, void* ocall_entry);
+typedef sgx_status_t (*dl_init_t)(void *get_func_addr, void *get_addr_name_addr);
 
 enclave_entry_t enclave_entry_func = 0;
 
@@ -32,6 +33,19 @@ typedef struct {
 } ocall_entry;
 
 extern ocall_entry ocall_table_enclave;
+
+void* get_func_name(const char *func_name) {
+    return dlsym(lib_fd, func_name);
+}
+
+void* get_addr_name_addr(const char *func_addr) {
+    Dl_info info;
+    int ret = dladdr(func_addr, &info);
+    if (ret != 0) {
+        return NULL;
+    }
+    return (void*)info.dli_sname;
+}
 
 sgx_status_t SGXAPI sgx_create_enclave(const char *file_name, const int debug, sgx_launch_token_t *launch_token,
         int *launch_token_updated, sgx_enclave_id_t *enclave_id, sgx_misc_attribute_t *misc_attr) {
@@ -68,6 +82,13 @@ sgx_status_t SGXAPI sgx_create_enclave(const char *file_name, const int debug, s
         return SGX_ERROR_UNEXPECTED;
     }
     enclave_init(enclave_base, enclave_size, int(enclave_size * .8), enclave_size - int(enclave_size * .8), (void*)sgx_ocall);
+
+    dl_init_t dl_init = (dl_init_t)dlsym(lib_fd, "setup_dl_entry");
+    if (dl_init == NULL) {
+        printf("cannot find entry dl_init\n");
+        return SGX_ERROR_UNEXPECTED;
+    }
+    dl_init((void*)&get_func_name, (void*)&get_addr_name_addr);
 
     return SGX_SUCCESS;
 }

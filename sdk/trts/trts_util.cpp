@@ -73,3 +73,26 @@ sgx_status_t SGXAPI sgx_read_rand(unsigned char *rand, size_t length_in_bytes) {
     (void) length_in_bytes;   
     return SGX_SUCCESS;
 }
+
+int SGXAPI sgx_is_outside_enclave(const void *addr, size_t size) {
+    return !sgx_is_within_enclave(addr, size);
+}
+
+dl_entry get_function;
+dl_entry get_addr_name;
+
+__attribute__ ((visibility ("default")))
+sgx_status_t setup_dl_entry(void *get_func_addr, void *get_addr_name_addr) {
+    get_function    = (dl_entry) get_func_addr;
+    get_addr_name   = (dl_entry) get_addr_name_addr;
+    return SGX_SUCCESS;
+}
+
+
+void* SGXAPI sgx_get_func(const char *addr) {
+    return (*get_function)(addr);
+}
+
+void* SGXAPI sgx_get_addr_name(const char *addr) {
+    return (*get_addr_name)(addr);
+}
