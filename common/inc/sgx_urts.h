@@ -29,8 +29,6 @@
  *
  */
 
-
-
 #ifndef _SGX_URTS_H_
 #define _SGX_URTS_H_
 
@@ -40,11 +38,16 @@
 #include "sgx_defs.h"
 #include "sgx_key.h"
 
+extern TEEC_Context ctx;
+extern TEEC_Session sess;
+extern TEEC_UUID uuid;
+
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef uint8_t sgx_launch_token_t[1024];
+    typedef uint8_t sgx_launch_token_t[1024];
 
 /* Convenient macro to be passed to sgx_create_enclave(). */
 #if !defined(NDEBUG) || defined(EDEBUG)
@@ -53,13 +56,16 @@ typedef uint8_t sgx_launch_token_t[1024];
 #define SGX_DEBUG_FLAG ((int)0)
 #endif
 
-sgx_status_t SGXAPI sgx_create_enclave(const char *file_name, const int debug, sgx_launch_token_t *launch_token, int *launch_token_updated, sgx_enclave_id_t *enclave_id, sgx_misc_attribute_t *misc_attr);
+    sgx_status_t SGXAPI sgx_create_enclave(const char *file_name, const int debug, sgx_launch_token_t *launch_token, int *launch_token_updated, sgx_enclave_id_t *enclave_id, sgx_misc_attribute_t *misc_attr);
 
-sgx_status_t SGXAPI sgx_destroy_enclave(const sgx_enclave_id_t enclave_id);
+    sgx_status_t SGXAPI sgx_destroy_enclave(const sgx_enclave_id_t enclave_id);
+
+    sgx_status_t SGXAPI ocall_add(char *ocall_buffer, void **ocall_table);
+
+    sgx_status_t SGXAPI ocall_del(char *ocall_buffer);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif
