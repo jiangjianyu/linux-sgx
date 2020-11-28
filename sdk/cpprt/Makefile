@@ -97,5 +97,6 @@ clean:
               linux/libunwind/doc/Makefile.in     \
               linux/libunwind/include/pthread_compat.h \
               linux/libunwind/include/config.h.in \
-              linux/libunwind/src/Makefile.in
+              linux/libunwind/src/Makefile.in \
+              linux/libunwind/Makefile
 

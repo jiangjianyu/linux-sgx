@@ -35,7 +35,7 @@ CFLAGS   += $(ENCLAVE_CFLAGS)
 CPPFLAGS += $(ADDED_INC)                \
             -I$(COMMON_DIR)/inc/tlibc/
 
-SRCS := $(wildcard *.c)
+SRCS := $(filter-out stack_chk.c, $(wildcard *.c))
 OBJS := $(sort $(SRCS:.c=.o))
 
 TARGET  := libcompiler-rt.a

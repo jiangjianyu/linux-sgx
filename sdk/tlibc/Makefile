@@ -48,7 +48,7 @@ ifneq ($(USE_OPT_LIBS), 0)
 # CXXFLAGS += -D_TLIBC_USE_INTEL_FAST_STRING_
 LIBC_C_SRCS := $(wildcard gen/*.c gdtoa/*.c locale/*.c math/*.c stdlib/*.c string/*.c stdio/*.c time/*.c) 
 else
-LIBC_C_SRCS := $(wildcard gen/*.c gdtoa/*.c locale/*.c stdlib/*.c string/*.c stdio/*.c time/*.c)
+LIBC_C_SRCS := $(filter-out stdlib/malloc.c, $(wildcard gen/*.c gdtoa/*.c locale/*.c stdlib/*.c string/*.c stdio/*.c time/*.c))
 endif
 
 LIBC_CPP_SRCS := $(wildcard gen/*.cpp) tstdc_version.cpp

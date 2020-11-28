@@ -31,7 +31,11 @@
 
 #include <errno.h>
 
-extern int *get_errno_addr(void);
+int error_num;
+
+int *get_errno_addr(void) {
+	return &error_num;
+}
 
 int *__errno(void)
 {
