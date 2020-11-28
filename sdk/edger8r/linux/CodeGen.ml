@@ -824,8 +824,8 @@ let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
     sprintf "&%s" ocall_table_name in
 
   (* Normal case - do ECALL with marshaling structure*)
-  let ecall_with_ms = sprintf "ocall_add(output_sm.buffer, ocall_table_hello_world.table);\n\tstatus = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n\tocall_del(output_sm.buffer);"
-                              idx in
+  let ecall_with_ms = sprintf "ocall_add(output_sm.buffer, %s.table);\n\tstatus = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n\tocall_del(output_sm.buffer);"
+                              ocall_table_name idx in
 
   (* Rare case - the trusted function doesn't have parameter nor return value.
    * In this situation, no marshaling structure is required - passing in NULL.
