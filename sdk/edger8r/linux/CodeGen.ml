@@ -208,22 +208,26 @@ let get_ptr_length (ty: Ast.atype) (attr: Ast.ptr_attr) (declr: Ast.declarator) 
   let name        = declr.Ast.identifier in
   let mk_size_var = if is_tmp then (fun x -> mk_tmp_var x) else fun x -> x in
 
+  let atype_name = Ast.get_tystr ty in
+
   let mk_len_size v =
     match v with
-      Ast.AString s -> s
+      Ast.AString s -> mk_size_var s
     | Ast.ANumber n -> sprintf "%d" n in
+
+  let mk_sizeof_name = mk_size_var name in
 
   let size_str =
     match attr.Ast.pa_size.Ast.ps_size with
       Some a -> mk_len_size a
     | None   ->
       match attr.Ast.pa_size.Ast.ps_sizefunc with
-        None   -> sprintf "sizeof(*%s)" name
+        None   -> sprintf "sizeof(*%s)" mk_sizeof_name
       | Some a -> a
   in
     match attr.Ast.pa_size.Ast.ps_count with
-      None   -> mk_size_var size_str
-    | Some a -> sprintf "%s\n\n" (mk_len_size a ^ "*" ^ mk_size_var size_str)
+      None   -> size_str
+    | Some a -> sprintf "%s" (mk_len_size a ^ " * " ^ size_str)
 
 let get_first = fun (a, b) -> b
 
@@ -1154,7 +1158,7 @@ let gen_tbridge_local_vars (plist: Ast.pdecl list) =
       Ast.PtrNoDirection -> ""
     | _ -> sprintf "\t%s %s = NULL;\n" (Ast.get_tystr ty) (mk_in_var name)
     in
-      len_var ^ tmp_var ^ in_ptr
+      tmp_var ^ len_var ^ in_ptr
   in
   let gen_local_var_for_foreign_array (ty: Ast.atype) (attr: Ast.ptr_attr) (name: string) =
     let tystr = Ast.get_tystr ty in
@@ -1413,17 +1417,13 @@ let gen_trusted_source (ec: enclave_content) =
   let code_fname = get_tsource_name ec.file_shortnm in
   let include_hd = "#include \"" ^ get_theader_short_name ec.file_shortnm ^ "\"\n\n\
 #include \"tee_internal_api.h\"\n\
-#include \"tee_ext_api.h\"\n\
-#include \"tee_log.h\"\n\
-#include \"securec.h\"\n\
 #include \"tee_enclave.h\"\n\
+#include \"sgx_error.h\"
 #include <string.h> /* for memcpy etc */\n\
 #include <stdlib.h> /* for malloc/free etc */\n\n\
 typedef TEE_Result (*ecall_invoke_entry) (uint32_t, TEE_Param[4]);\n\n\
 TEE_Param ocall_param;\n\n\
 TEE_Result TA_CreateEntryPoint(void) {\n\
-\taddcaller_ca_exec(\"/vendor/bin/test_ca\", \"root\");\n\
-\taddcaller_ca_exec(\"/vendor/bin/teec_hello\", \"root\");\n\
 return TEE_SUCCESS; }\n\n\
 void TA_DestroyEntryPoint(void) {}\n\n\
 TEE_Result TA_OpenSessionEntryPoint(uint32_t param_types,\n\
