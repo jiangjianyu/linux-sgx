@@ -217,17 +217,17 @@ let get_ptr_length (ty: Ast.atype) (attr: Ast.ptr_attr) (declr: Ast.declarator) 
 
   let mk_sizeof_name = mk_size_var name in
 
-  let size_str =
+  let size_str is_none =
     match attr.Ast.pa_size.Ast.ps_size with
       Some a -> mk_len_size a
     | None   ->
       match attr.Ast.pa_size.Ast.ps_sizefunc with
-        None   -> sprintf "sizeof(*%s)" mk_sizeof_name
+        None   -> if is_none then "0" else sprintf "sizeof(*%s)" mk_sizeof_name
       | Some a -> a
   in
     match attr.Ast.pa_size.Ast.ps_count with
-      None   -> size_str
-    | Some a -> sprintf "%s" (mk_len_size a ^ " * " ^ size_str)
+      None   -> size_str true
+    | Some a -> sprintf "%s" (mk_len_size a ^ " * " ^ (size_str false))
 
 let get_first = fun (a, b) -> b
 
@@ -727,7 +727,11 @@ let gen_func_ubridge (file_shortnm: string) (ufunc: Ast.untrusted_func) =
   let rewrite_buffer = List.fold_left(fun (acc, rewrite_buf) (pty, declr) ->
    match pty with
        Ast.PTVal _         -> (acc, rewrite_buf)
-     | Ast.PTPtr(ty, attr) -> (acc ^ " + " ^ get_ptr_length ty attr declr false, rewrite_buf ^ sprintf "\tms->ms_%s = pms%s;\n" declr.Ast.identifier acc)) (input_size_base, "") fd.Ast.plist
+     | Ast.PTPtr(ty, attr) -> 
+     match attr.Ast.pa_direction with 
+     Ast.PtrIn | Ast.PtrOut | Ast.PtrInOut ->
+     (acc ^ " + " ^ get_ptr_length ty attr declr false, rewrite_buf ^ sprintf "\tms->ms_%s = pms%s;\n" declr.Ast.identifier acc)
+     | _ -> (acc, rewrite_buf)) (input_size_base, "") fd.Ast.plist
   in
   let call_with_pms =
     let invoke_func = gen_func_invoking fd mk_parm_name_ubridge in
@@ -790,7 +794,10 @@ let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
       Ast.PTVal _         -> (acc, copy_buf)
     | Ast.PTPtr(ty, attr) -> 
     let total_len = get_ptr_length ty attr declr false in
-    (acc ^ " + " ^ total_len, copy_buf ^ sprintf "\tmemcpy(input_sm.buffer + %s, %s, %s);\n" acc declr.Ast.identifier total_len)) (input_size_base, "") fd.Ast.plist
+    match attr.pa_direction with
+      Ast.PtrInOut | Ast.PtrIn ->
+    (acc ^ " + " ^ total_len, copy_buf ^ sprintf "\tmemcpy(input_sm.buffer + %s, %s, %s);\n" acc declr.Ast.identifier total_len)
+    | _ -> (acc ^ " + " ^ total_len, copy_buf)) (input_size_base, "") fd.Ast.plist
   in
   let copy_buffer_out_struct = List.fold_left (fun (acc, copy_buf) (pty, declr) ->
      match pty with
@@ -1178,9 +1185,12 @@ let gen_tbridge_local_vars (plist: Ast.pdecl list) =
       match pty with
       Ast.PTVal _          -> ""
     | Ast.PTPtr (ty, attr) ->
+      match attr.Ast.pa_direction with
+      Ast.PtrOut | Ast.PtrIn | Ast.PtrInOut ->
             if is_foreign_array pty
             then gen_local_var_for_foreign_array ty attr declr.Ast.identifier
             else do_gen_local_var ty attr declr.Ast.identifier offset
+      | _ -> sprintf "\t%s _tmp_%s = ms->ms_%s;\n" (Ast.get_tystr ty) declr.Ast.identifier declr.Ast.identifier
   in
   let new_param_list = List.map conv_array_to_ptr plist
   in
@@ -1338,7 +1348,7 @@ let gen_func_tproxy (ufunc: Ast.untrusted_func) (idx: int) =
           | _ -> ""
     in get_first (List.fold_left (fun (len, acc) (pty, declr) ->
              match pty with
-                             Ast.PTVal _ -> (len, acc)
+                 Ast.PTVal _ -> (len, acc)
                | Ast.PTPtr(ty, attr) -> (len ^ " + " ^ get_ptr_length ty attr declr false, acc ^ copy_memory attr declr len)) ("", "") plist) in
 
   let set_errno = if propagate_errno then "\terrno = ms->ocall_errno;" else "" in
@@ -1351,7 +1361,7 @@ let gen_func_tproxy (ufunc: Ast.untrusted_func) (idx: int) =
                               retval_name retval_name (mk_parm_accessor retval_name) in
   let fill_ms_field_all = get_first (List.fold_left(fun (len, acc) (pty, declr) ->
     match pty with
-    Ast.PTVal _ -> (len, acc)
+    Ast.PTVal _ -> (len, acc ^ tproxy_fill_ms_field (pty, declr) len)
     | Ast.PTPtr(ty, attr) -> (len ^ " + " ^ get_ptr_length ty attr declr false, acc ^ tproxy_fill_ms_field (pty, declr) len)
   ) ("", "") fd.Ast.plist) in
   let func_body = ref [] in
