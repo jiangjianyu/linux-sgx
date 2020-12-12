@@ -709,6 +709,17 @@ let gen_func_invoking (fd: Ast.func_decl)
           (let p0 = gen_parm_str pt declr in
              List.fold_left (fun acc (pty, dlr) ->
                                acc ^ ", " ^ gen_parm_str pty dlr) p0 ps)
+(* Generate local variables required for the trusted bridge. *)
+let gen_ubridge_local_vars (plist: Ast.pdecl list) =
+  let do_gen_local_var (ty: Ast.atype) (name: string) =
+    sprintf "\t%s %s = ms->ms_%s;\n" (Ast.get_tystr ty) name name
+  in
+  let new_param_list = List.map conv_array_to_ptr plist
+  in
+    List.fold_left (fun acc (pty, declr) ->
+      match pty with
+      Ast.PTVal (ty)      -> acc ^ do_gen_local_var ty declr.Ast.identifier
+    | Ast.PTPtr(ty, attr) -> acc ^ do_gen_local_var ty declr.Ast.identifier) "" new_param_list
 
 (* Generate untrusted bridge code for a given untrusted function. *)
 let gen_func_ubridge (file_shortnm: string) (ufunc: Ast.untrusted_func) =
@@ -716,6 +727,7 @@ let gen_func_ubridge (file_shortnm: string) (ufunc: Ast.untrusted_func) =
   let propagate_errno = ufunc.Ast.uf_propagate_errno in
   let func_open = sprintf "%s\n{\n" (mk_ubridge_proto file_shortnm fd.Ast.fname) in
   let func_close = "\treturn TEEC_SUCCESS;\n}\n" in
+  let local_vars = gen_ubridge_local_vars fd.Ast.plist in
   let set_errno = if propagate_errno then "\tms->ocall_errno = errno;" else "" in
   let ms_struct_name = mk_ms_struct_name fd.Ast.fname in
   let declare_ms_ptr = sprintf "%s* %s = SGX_CAST(%s*, %s);"
@@ -742,9 +754,9 @@ let gen_func_ubridge (file_shortnm: string) (ufunc: Ast.untrusted_func) =
       let check_pms =
         sprintf "if (%s != NULL) return SGX_ERROR_INVALID_PARAMETER;" ms_ptr_name
       in
-        sprintf "%s\t%s\n%s\n\t%s\n%s" func_open check_pms (get_first rewrite_buffer) call_with_pms func_close
+        sprintf "%s\t%s\n%s%s\n\t%s\n%s" func_open check_pms local_vars (get_first rewrite_buffer) call_with_pms func_close
       else
-        sprintf "%s\t%s\n%s\n\t%s\n%s\n%s" func_open declare_ms_ptr (get_first rewrite_buffer) call_with_pms set_errno func_close
+        sprintf "%s\t%s\n%s%s\n\t%s\n%s\n%s" func_open declare_ms_ptr local_vars (get_first rewrite_buffer) call_with_pms set_errno func_close
 
 let fill_ms_field (isptr: bool) (pd: Ast.pdecl) =
   let accessor       = if isptr then "->" else "." in
