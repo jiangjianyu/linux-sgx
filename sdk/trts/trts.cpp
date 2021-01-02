@@ -10,6 +10,9 @@ char* lastest_ocall_table;
 sgx_enclave_id_t latest_enclave_id;
 
 thread_data_t thread;
+sys_word_t base_addr = 0;
+sys_word_t limit_addr = 0;
+// TODO: fill-in the structure
 
 __attribute__ ((visibility ("default")))
 sgx_status_t sgx_ecall(const sgx_enclave_id_t enclave_id, const int proc, const void *ocall_table, void *ms) {
@@ -27,9 +30,11 @@ sgx_status_t sgx_ocall(const unsigned int index,
 extern "C" {
 
 thread_data_t *get_thread_data(void) {
-    return (thread_data_t*)get_enclave_base();
+    thread.stack_base_addr    =   (sys_word_t) &base_addr;
+    thread.stack_limit_addr   =   (sys_word_t) &limit_addr;
+    return (thread_data_t*)(&thread);
 }
 
-unsigned long __stack_chk_guard = 0xBAAAAAAD;
+// unsigned long __stack_chk_guard = 0xBAAAAAAD;
 }
 

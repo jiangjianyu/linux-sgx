@@ -305,8 +305,9 @@ static void free_exception_list(__cxa_exception *ex)
  */
 static __cxa_thread_info* __get_thread_info_ptr()
 {
-	thread_data_t* td = get_thread_data();
-	return (__cxa_thread_info *)td->cxx_thread_info;
+	// thread_data_t* td = get_thread_data();
+	// return (__cxa_thread_info *)td->cxx_thread_info;
+	return NULL;
 }
 
 /**

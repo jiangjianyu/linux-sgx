@@ -15,7 +15,7 @@ then
 else
     COMMON_FLAGS="$CFLAGS -g -O2"
 fi
-CFLAGS="$COMMON_FLAGS -fno-builtin -DHAVE_SGX=1 -fPIC -DUNW_LOCAL_ONLY -fdebug-prefix-map=$(pwd)=/libunwind"
+CFLAGS="$COMMON_FLAGS -fno-builtin -nostdinc -ffreestanding -DHAVE_SGX=1 -fPIC -DUNW_LOCAL_ONLY -fdebug-prefix-map=$(pwd)=/libunwind"
 
 # Remove duplicated compiler options and filter out `-nostdinc'
 CFLAGS=`echo $CFLAGS | tr ' ' '\n' | grep -v nostdinc | tr '\n' ' '`

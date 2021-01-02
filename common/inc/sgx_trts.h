@@ -62,6 +62,8 @@ void* SGXAPI sgx_get_func(const char *func_name);
 
 void* SGXAPI sgx_get_func_from(const void* base_addr, const char *func_name);
 
+void* SGXAPI sgx_get_addr_name(const char *addr);
+
 /* sgx_is_outside_enclave()
  * Parameters:
  *      addr - the start address of the buffer

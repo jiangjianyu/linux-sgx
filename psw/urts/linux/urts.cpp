@@ -48,6 +48,8 @@ sgx_enclave_id_t global_eid = 0;
 
 typedef sgx_status_t (*ocall_func_entry)(void *pms);
 
+extern "C" sgx_status_t init_sgx_buffer();
+
 sgx_status_t sgx_create_enclave(const char *file_name, const int debug, sgx_launch_token_t *launch_token, int *launch_token_updated, sgx_enclave_id_t *enclave_id, sgx_misc_attribute_t *misc_attr)
 {
 
@@ -79,12 +81,16 @@ sgx_status_t sgx_create_enclave(const char *file_name, const int debug, sgx_laun
 	 * world!" in the log when the session is created.
 	 */
 	res = TEEC_OpenSession(&ctx, &sess, &uuid,
-						   TEEC_LOGIN_PUBLIC, NULL, &operation, &err_origin);
+						   TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
 	if (res != TEEC_SUCCESS)
 		errx(1, "TEEC_Opensession failed with code 0x%x origin 0x%x",
 			 res, err_origin);
 
 	*enclave_id = ++global_eid;
+
+	if (init_sgx_buffer() != SGX_SUCCESS) {
+		return TEEC_ERROR_BAD_PARAMETERS;
+	}
 
 	return res;
 }
