@@ -790,7 +790,7 @@ let fill_ms_field (isptr: bool) (pd: Ast.pdecl) =
 let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
   let func_open  =
     gen_uproxy_com_proto fd ec.enclave_name ^
-      "\n{\n\tsgx_status_t status;\n\tTEEC_Operation op;\n\tuint32_t ret_orig;\n\tTEEC_SharedMemory input_sm;\n\tTEEC_SharedMemory output_sm;\n\n"
+      "\n{\n\tsgx_status_t status;\n\tTEEC_Operation op;\n\tuint32_t ret_orig;\n\n"
   in
   let func_close = "\treturn status;\n}\n" in
   let ocall_table_name  = mk_ocall_table_name ec.enclave_name in
@@ -823,16 +823,6 @@ let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
   in
   let copy_buffer_str = "\n" ^ get_first copy_buffer_struct in
   let copy_buffer_out_str = "\n" ^ get_first copy_buffer_out_struct in
-  let alloc_share_mem = sprintf "input_sm.size = %s;\n\
-                  \tinput_sm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;\n\
-                  \toutput_sm.size = 10240;\n\
-                  \toutput_sm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;\n\
-                  \tstatus = TEEC_AllocateSharedMemory(&ctx, &input_sm);\n\
-                  \tif (status != TEEC_SUCCESS) \t{\n\t\treturn status;\n\t}\n\
-                  \tstatus = TEEC_AllocateSharedMemory(&ctx, &output_sm);\n\
-                  \tif (status != TEEC_SUCCESS) \t{\n\t\treturn status;\n\t}\n\n"
-                  input_size_str
-  in
   let set_share_mem = sprintf "\n\tmemset(&op, 0, sizeof(op));\n\
                       \top.started = 1;\n\
                       \top.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_WHOLE, TEEC_MEMREF_WHOLE, TEEC_NONE, TEEC_NONE);\n\
@@ -847,13 +837,13 @@ let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
     sprintf "&%s" ocall_table_name in
 
   (* Normal case - do ECALL with marshaling structure*)
-  let ecall_with_ms = sprintf "ocall_add(output_sm.buffer, %s.table);\n\tstatus = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n\tocall_del(output_sm.buffer);"
-                              ocall_table_name idx in
+  let ecall_with_ms = sprintf "status = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n"
+                              idx in
 
   (* Rare case - the trusted function doesn't have parameter nor return value.
    * In this situation, no marshaling structure is required - passing in NULL.
    *)
-  let ecall_null = sprintf "ocall_add(output_sm.buffer, ocall_table_hello_world.table);\n\tstatus = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n\tocall_del(output_sm.buffer);"
+  let ecall_null = sprintf "status = TEEC_InvokeCommand(&sess, %d, &op, &ret_orig);\n"
                            idx
   in
   let update_retval = sprintf "if (status == TEEC_SUCCESS && %s) {\n\t\t*%s = %s->%s;%s\t}"
@@ -864,7 +854,7 @@ let gen_func_uproxy (fd: Ast.func_decl) (idx: int) (ec: enclave_content) =
       sprintf "%s\t%s\n%s" func_open ecall_null func_close
     else
       begin
-        func_body := copy_buffer_str :: declare_ms_expr :: alloc_share_mem :: !func_body;
+        func_body := copy_buffer_str :: declare_ms_expr :: !func_body;
         List.iter (fun pd -> func_body := fill_ms_field true pd :: !func_body) fd.Ast.plist;
         func_body := ecall_with_ms :: set_share_mem :: !func_body;
         if fd.Ast.rtype <> Ast.Void then func_body := update_retval :: !func_body else func_body := update_outval :: !func_body;
@@ -1418,6 +1408,9 @@ let gen_untrusted_source (ec: enclave_content) =
   let code_fname = get_usource_name ec.file_shortnm in
   let include_hd = "#include \"" ^ get_uheader_short_name ec.file_shortnm ^ "\"\n" in
   let include_errno = "#include <errno.h>\n" in
+  let include_uuid = "TEEC_UUID uuid = { 0x8aaaf200, 0x2450, 0x11e4, { 0xab, 0xe2, 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b} };\n" in
+  let include_buffer = "TEEC_SharedMemory input_sm;\nTEEC_SharedMemory output_sm;\n\n" in
+  let include_buffer_init = "sgx_status_t init_sgx_buffer() {\n\tsgx_status_t status;\n\tinput_sm.size = 10240;\n\tinput_sm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;\n\toutput_sm.size = 10240;\n\toutput_sm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;\n\tstatus = TEEC_AllocateSharedMemory(&ctx, &input_sm);\n\tif (status != TEEC_SUCCESS) {\n\treturn status;\n\t}\n\tstatus = TEEC_AllocateSharedMemory(&ctx, &output_sm);\n\tif (status != TEEC_SUCCESS) {\n\treturn status;\n}\n\tocall_add(output_sm.buffer, ocall_table_securecompiler.table);\n}\n" in
   let uproxy_list =
     List.map2 (fun fd ecall_idx -> gen_func_uproxy fd ecall_idx ec)
       (tf_list_to_fd_list ec.tfunc_decls)
@@ -1427,10 +1420,11 @@ let gen_untrusted_source (ec: enclave_content) =
     List.map (fun fd -> gen_func_ubridge ec.file_shortnm fd)
       (ec.ufunc_decls) in
   let out_chan = open_out code_fname in 
-    output_string out_chan (include_hd ^ include_errno ^ "\n");
+    output_string out_chan (include_hd ^ include_errno ^ include_uuid ^ "\n");
     ms_writer out_chan ec;
     List.iter (fun s -> output_string out_chan (s ^ "\n")) ubridge_list;
     output_string out_chan (gen_ocall_table ec);
+    output_string out_chan (include_buffer ^ include_buffer_init);
     List.iter (fun s -> output_string out_chan (s ^ "\n")) uproxy_list;
     close_out out_chan
 
