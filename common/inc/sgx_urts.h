@@ -60,7 +60,7 @@ extern "C"
 
     sgx_status_t SGXAPI sgx_destroy_enclave(const sgx_enclave_id_t enclave_id);
 
-    sgx_status_t SGXAPI ocall_add(char *ocall_buffer, void **ocall_table);
+    sgx_status_t SGXAPI ocall_add(char *ocall_buffer, void* const* ocall_table);
 
     sgx_status_t SGXAPI ocall_del(char *ocall_buffer);
 
