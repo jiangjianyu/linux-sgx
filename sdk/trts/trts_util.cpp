@@ -51,12 +51,6 @@ void* get_enclave_base() {
     return enclave_base;
 }
 
-int error_internal;
-
-int * get_errno_addr(void) {
-    return &error_internal;
-}
-
 int sgx_is_within_enclave(const void *addr, size_t size) {
     return ((char*)addr >= (char*)enclave_base 
         && (char*)addr + size < (char*)enclave_base + enclave_size);
@@ -72,4 +66,14 @@ sgx_status_t SGXAPI sgx_read_rand(unsigned char *rand, size_t length_in_bytes) {
     (void) rand;
     (void) length_in_bytes;   
     return SGX_SUCCESS;
+}
+
+void* SGXAPI sgx_get_func(const char *func_name) {
+    (void)(func_name);
+    return NULL;
+}
+
+void* SGXAPI sgx_get_addr_name(const char *addr) {
+    (void)(addr);
+    return NULL;
 }

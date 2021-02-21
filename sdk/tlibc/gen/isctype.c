@@ -39,18 +39,18 @@
 #include "ctype_private.h"
 
 #undef isalnum
-int
-isalnum(int c)
-{
-	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] & (_U|_L|_N)));
-}
+// int
+// isalnum(int c)
+// {
+// 	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] & (_U|_L|_N)));
+// }
 
 #undef isalpha
-int
-isalpha(int c)
-{
-	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] & (_U|_L)));
-}
+// int
+// isalpha(int c)
+// {
+// 	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] & (_U|_L)));
+// }
 
 #undef isblank
 int

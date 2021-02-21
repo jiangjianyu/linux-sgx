@@ -37,7 +37,7 @@
 #include "internal/se_cdefs.h"
 
 namespace std{
-    static sgx_spinlock_t handler_lock = SGX_SPINLOCK_INITIALIZER;
+    // static sgx_spinlock_t handler_lock = SGX_SPINLOCK_INITIALIZER;
     //default hanlder is NULL
     static new_handler new_handl = NULL;
 
@@ -55,16 +55,16 @@ namespace std{
     //									 NULL -if this is the first call to set_new_handler
     new_handler set_new_handler(new_handler handle) throw()
     {
-        sgx_spin_lock(&handler_lock);
-        new_handler retHandle = new_handl;
-        if ( handle == NULL ){
-            new_handl = NULL;
-        } else if ( sgx_is_within_enclave((void *)handle, 0) ){
-            //only set the handler when handler address is inside enclave
-            new_handl = handle;
-        }
-        sgx_spin_unlock(&handler_lock);
-        return retHandle;
+        // sgx_spin_lock(&handler_lock);
+        // new_handler retHandle = new_handl;
+        // if ( handle == NULL ){
+        //     new_handl = NULL;
+        // } else if ( sgx_is_within_enclave((void *)handle, 0) ){
+        //     //only set the handler when handler address is inside enclave
+        //     new_handl = handle;
+        // }
+        // sgx_spin_unlock(&handler_lock);
+        // return retHandle;
     }
 };
 
@@ -73,17 +73,17 @@ using namespace std;
 //call new_handl function when  new memory failed
 int  call_newh()
 {
-    int ret = 0;
-    sgx_spin_lock(&handler_lock);
-    new_handler handler = new_handl;
-    //unlock the handler here because new_handl may call set_new_handler again, will cause dead lock.
-    sgx_spin_unlock(&handler_lock);
+    // int ret = 0;
+    // sgx_spin_lock(&handler_lock);
+    // new_handler handler = new_handl;
+    // //unlock the handler here because new_handl may call set_new_handler again, will cause dead lock.
+    // sgx_spin_unlock(&handler_lock);
 
-    // call new handler
-    if ( handler != NULL ){
-        handler();
-        ret = 1;
-    }
+    // // call new handler
+    // if ( handler != NULL ){
+    //     handler();
+    //     ret = 1;
+    // }
    
-    return ret;
+    return -1;
 }

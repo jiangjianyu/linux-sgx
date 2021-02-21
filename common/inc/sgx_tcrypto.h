@@ -310,8 +310,8 @@ extern "C" {
     * Parameters:
     *   Return: sgx_status_t  - SGX_SUCCESS or failure as defined in sgx_error.h
     *   Inputs: sgx_cmac_128bit_key_t *p_key - Pointer to the key used in encryption/decryption operation
-    *           uint8_t *p_src - Pointer to the input stream to be MAC’d
-    *           uint32_t src_len - Length of the input stream to be MAC’d
+    *           uint8_t *p_src - Pointer to the input stream to be MACï¿½d
+    *           uint32_t src_len - Length of the input stream to be MACï¿½d
     *   Output: sgx_cmac_gcm_128bit_tag_t *p_mac - Pointer to the resultant MAC
     */
     sgx_status_t SGXAPI sgx_rijndael128_cmac_msg(const sgx_cmac_128bit_key_t *p_key,
@@ -666,6 +666,10 @@ extern "C" {
         const sgx_rsa3072_public_key_t *p_public,
         const sgx_rsa3072_signature_t *p_signature,
 		sgx_rsa_result_t *p_result);
+
+    sgx_status_t sgx_rsa_keygen (int bitsRSA, char* pubKey, char* privKey);
+    sgx_status_t sgx_rsa_oaep_encrypt(const uint8_t *src, uint32_t src_len, char* pubKey, uint8_t* dst);
+    sgx_status_t sgx_rsa_oaep_decrypt(const uint8_t *src, int* dst_len, char* privKey, uint8_t* dst);
 
 #ifdef __cplusplus
 }

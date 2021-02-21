@@ -41,8 +41,8 @@
 #define pthread_mutex_t           sgx_spinlock_t
 #define PTHREAD_MUTEX_INITIALIZER SGX_SPINLOCK_INITIALIZER
 
-#define pthread_mutex_lock        sgx_spin_lock
-#define pthread_mutex_unlock      sgx_spin_unlock
+#define pthread_mutex_lock
+#define pthread_mutex_unlock
 
 #if 0
 #define pthread_mutex_init        sgx_thread_mutex_init
