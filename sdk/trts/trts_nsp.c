@@ -71,7 +71,7 @@ static void init_stack_guard(void *tcs)
     thread_data->stack_guard = tmp_stack_guard;
 }
 
-extern "C" int enter_enclave(int index, void *ms, void *tcs, int cssa)
+int enter_enclave(int index, void *ms, void *tcs, int cssa)
 {
     if(get_enclave_state() == ENCLAVE_CRASHED)
     {

@@ -54,9 +54,7 @@ typedef struct {
 } entry_table_t;
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 extern ecall_table_t g_ecall_table;
 extern entry_table_t g_dyn_entry_table;
 
@@ -72,8 +70,5 @@ sgx_status_t trts_handle_exception(void *tcs);
 sgx_status_t do_ecall_add_thread(void *ms, void *tcs);
 sgx_status_t do_uninit_enclave(void *tcs);
 int check_static_stack_canary(void *tcs);
-#ifdef __cplusplus
-}
-#endif
 
 #endif

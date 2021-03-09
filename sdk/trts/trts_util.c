@@ -75,7 +75,7 @@ size_t get_heap_min_size(void)
 int * get_errno_addr(void)
 {
     thread_data_t *thread_data = get_thread_data();
-    return reinterpret_cast<int *>(&thread_data->last_error);
+    return (int *)(&thread_data->last_error);
 }
 
 //tRTS will receive a pointer to an array of uint64_t which indicates the

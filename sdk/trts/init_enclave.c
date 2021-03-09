@@ -58,13 +58,11 @@ const volatile global_data_t g_global_data = {1, 2, 3, 4,
    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0, 0, 0}, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, {{{0, 0, 0, 0, 0, 0, 0}}}};
 uint32_t g_enclave_state = ENCLAVE_INIT_NOT_STARTED;
 
-extern "C" {
 uintptr_t __stack_chk_guard = 0;
 #define __weak_alias(alias,sym)                 \
     __asm__(".weak " __STRING(alias) " ; "      \
         __STRING(alias) " = " __STRING(sym))
 __weak_alias(__intel_security_cookie, __stack_chk_guard);
-}
 
 // init_enclave()
 //      Initialize enclave.
@@ -75,7 +73,7 @@ __weak_alias(__intel_security_cookie, __stack_chk_guard);
 //       0 - success
 //      -1 - fail
 //
-extern "C" int init_enclave(void *enclave_base, void *ms)
+int init_enclave(void *enclave_base, void *ms)
 {
     if(enclave_base == NULL || ms == NULL)
     {

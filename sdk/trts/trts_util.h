@@ -38,7 +38,7 @@
 #include "se_types.h"
 
 #ifdef __cplusplus
-extern "C" {
+{
 #endif
 
 void * get_heap_base(void);

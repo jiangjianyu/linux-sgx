@@ -42,7 +42,7 @@
 #include "se_types.h"
 
 #ifdef __cplusplus
-extern "C" {
+{
 #endif
 
 int relocate_enclave(void* enclave_base);

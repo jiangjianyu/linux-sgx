@@ -67,7 +67,7 @@ SGX_ACCESS_VERSION(trts, 1);
 //
 int sgx_is_within_enclave(const void *addr, size_t size)
 {
-    size_t start = reinterpret_cast<size_t>(addr);
+    size_t start = (size_t)(addr);
     size_t end = 0;
     size_t enclave_start = (size_t)&__ImageBase;
     size_t enclave_end = enclave_start + g_global_data.enclave_size - 1;
@@ -100,7 +100,7 @@ int sgx_is_within_enclave(const void *addr, size_t size)
 //
 int sgx_is_outside_enclave(const void *addr, size_t size)
 {
-    size_t start = reinterpret_cast<size_t>(addr);
+    size_t start = (size_t)(addr);
     size_t end = 0;
     size_t enclave_start = (size_t)&__ImageBase;
     size_t enclave_end = enclave_start + g_global_data.enclave_size - 1;
@@ -141,12 +141,12 @@ void * sgx_ocalloc(size_t size)
 {
     // read the outside stack address from current SSA
     thread_data_t *thread_data = get_thread_data();
-    ssa_gpr_t *ssa_gpr = reinterpret_cast<ssa_gpr_t *>(thread_data->first_ssa_gpr);
+    ssa_gpr_t *ssa_gpr = (ssa_gpr_t *)(thread_data->first_ssa_gpr);
     size_t addr = ssa_gpr->REG(sp_u);
 
     // check u_rsp points to the untrusted address.
     // if the check fails, it should be hacked. call abort directly
-    if(!sgx_is_outside_enclave(reinterpret_cast<void *>(addr), sizeof(size_t)))
+    if(!sgx_is_outside_enclave((void *)(addr), sizeof(size_t)))
     {
         abort();
     }
@@ -159,10 +159,10 @@ void * sgx_ocalloc(size_t size)
 
     // calculate the start address for the allocated memory
     addr -= size;
-    addr &= ~(static_cast<size_t>(OC_ROUND - 1));  // for stack alignment
+    addr &= ~((size_t)(OC_ROUND - 1));  // for stack alignment
 
     // the allocated memory has overlap with enclave, abort the enclave
-    if(!sgx_is_outside_enclave(reinterpret_cast<void *>(addr), size))
+    if(!sgx_is_outside_enclave((void *)(addr), size))
     {
         abort();
     }
@@ -190,13 +190,13 @@ void * sgx_ocalloc(size_t size)
         // So update the outside stack address before probe the page
         ssa_gpr->REG(sp_u) = page;
 
-        *reinterpret_cast<uint8_t *>(page) = 0;
+        *(uint8_t *)(page) = 0;
     }
 
     // update the outside stack address in the SSA to the allocated address
     ssa_gpr->REG(sp_u) = addr;
 
-    return reinterpret_cast<void *>(addr);
+    return (void *)(addr);
 }
 
 // sgx_ocfree()
@@ -216,10 +216,10 @@ void sgx_ocfree()
     //                      | xsp_u       |
 
     thread_data_t *thread_data = get_thread_data();
-    ssa_gpr_t *ssa_gpr = reinterpret_cast<ssa_gpr_t *>(thread_data->first_ssa_gpr);
-    uintptr_t *addr = reinterpret_cast<uintptr_t *>(thread_data->last_sp);
+    ssa_gpr_t *ssa_gpr = (ssa_gpr_t *)(thread_data->first_ssa_gpr);
+    uintptr_t *addr = (uintptr_t *)(thread_data->last_sp);
     uintptr_t usp = *(addr - 3);
-    if(!sgx_is_outside_enclave(reinterpret_cast<void *>(usp), sizeof(uintptr_t)))
+    if(!sgx_is_outside_enclave((void *)(usp), sizeof(uintptr_t)))
     {
         abort();
     }

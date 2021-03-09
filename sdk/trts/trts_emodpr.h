@@ -44,7 +44,7 @@
 #define SGX_CAST(type, item) ((type)(item))
 
 #ifdef __cplusplus
-extern "C" {
+{
 #endif
 
 sgx_status_t SGXAPI change_permissions_ocall(size_t addr, size_t size, uint64_t epcm_perms);

@@ -37,7 +37,7 @@
 #define SGX_TRTS_VERSION_STR  __CONCAT("SGX_TRTS_VERSION_", STRFILEVER)
 
 #ifdef __cplusplus
-extern "C" {
+{
 #endif
 
 __attribute__((visibility("default")))

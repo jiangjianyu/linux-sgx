@@ -44,7 +44,7 @@
 #define SGX_CAST(type, item) ((type)(item))
 
 #ifdef __cplusplus
-extern "C" {
+{
 #endif
 
 sgx_status_t SGXAPI trim_range_ocall(size_t fromaddr, size_t toaddr);

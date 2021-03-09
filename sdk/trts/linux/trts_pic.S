@@ -448,7 +448,7 @@ DECLARE_GLOBAL_FUNC asm_oret
 
 /* 
  * ------------------------------------------------------------------------
- * extern "C" int do_egetkey(key_request_t *key_request, key_128bit_t *key)
+ * int do_egetkey(key_request_t *key_request, key_128bit_t *key)
  * return value:
  *	0 - success
  *	none-zeor - EGETKEY error code
@@ -473,7 +473,7 @@ DECLARE_LOCAL_FUNC do_egetkey
 
 /* 
  * -------------------------------------------------------------------------
- * extern "C" void do_ereport(sgx_target_info_t *target_info, sgx_report_data_t *report_data, sgx_report_t *report);
+ * void do_ereport(sgx_target_info_t *target_info, sgx_report_data_t *report_data, sgx_report_t *report);
  * EREPORT: rbx - the address of TARGETINFO;
  *          rcx - the address of REPORTDATA;
  *          rdx - the address where REPORT is outputted
@@ -502,7 +502,7 @@ DECLARE_GLOBAL_FUNC do_emodpe
 #define _RDRAND_RETRY_TIMES 10	
 /* 
  * -------------------------------------
- * extern "C" uint32_t do_rdrand(uint32_t *rand);
+ * uint32_t do_rdrand(uint32_t *rand);
  * return value:
  *	non-zero: rdrand succeeded
  *	zero: rdrand failed
@@ -529,7 +529,7 @@ DECLARE_LOCAL_FUNC do_rdrand
 
 /*
  * -------------------------------------------------------------------------
- * extern "C" void abort(void) __attribute__(__noreturn__);
+ * void abort(void) __attribute__(__noreturn__);
  * -------------------------------------------------------------------------
  */
 DECLARE_LOCAL_FUNC abort
@@ -539,7 +539,7 @@ DECLARE_LOCAL_FUNC abort
 
 /* 
  * -------------------------------------------------------------------------
- * extern "C" __attribute__((regparm(1))) void continue_execution(sgx_exception_info_t *info);
+ * __attribute__((regparm(1))) void continue_execution(sgx_exception_info_t *info);
  * -------------------------------------------------------------------------
  */
 DECLARE_LOCAL_FUNC continue_execution

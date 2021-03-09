@@ -62,7 +62,7 @@ static sgx_status_t is_ecall_allowed(uint32_t ordinal)
             return SGX_ERROR_ECALL_NOT_ALLOWED;
         return SGX_SUCCESS;
     }
-    ocall_context_t *context = reinterpret_cast<ocall_context_t*>(thread_data->last_sp);
+    ocall_context_t *context = (ocall_context_t*)(thread_data->last_sp);
     if(context->ocall_flag != OCALL_FLAG)
     {
         // abort the enclave if ocall frame is invalid
@@ -91,7 +91,7 @@ static sgx_status_t get_func_addr(uint32_t ordinal, void **addr)
         return status;
     }
 
-    *addr = const_cast<void *>(g_ecall_table.ecall_table[ordinal].ecall_addr);
+    *addr = (void*)(g_ecall_table.ecall_table[ordinal].ecall_addr);
     if(!sgx_is_within_enclave(*addr, 0))
     {
         return SGX_ERROR_UNEXPECTED;
@@ -247,7 +247,7 @@ static sgx_status_t trts_ecall(uint32_t ordinal, void *ms)
     return status;
 }
 
-extern "C" uintptr_t __stack_chk_guard;
+uintptr_t __stack_chk_guard;
 static void init_static_stack_canary(void *tcs)
 {
     size_t *canary = TCS2CANARY(tcs);
@@ -262,7 +262,7 @@ static sgx_status_t do_init_thread(void *tcs)
     bool thread_first_init = (saved_stack_commit_addr == 0) ? true : false;
 #endif
     size_t stack_guard = thread_data->stack_guard;
-    memcpy_s(thread_data, SE_PAGE_SIZE, const_cast<thread_data_t *>(&g_global_data.td_template), sizeof(thread_data_t));
+    memcpy_s(thread_data, SE_PAGE_SIZE, (thread_data_t *)(&g_global_data.td_template), sizeof(thread_data_t));
     thread_data->last_sp += (size_t)tcs;
     thread_data->self_addr += (size_t)tcs;
     thread_data->stack_base_addr += (size_t)tcs;
@@ -421,7 +421,7 @@ sgx_status_t do_uninit_enclave(void *tcs)
     return SGX_SUCCESS;
 }
 
-extern "C" sgx_status_t sgx_trts_mprotect(size_t start, size_t size, uint64_t perms)
+sgx_status_t sgx_trts_mprotect(size_t start, size_t size, uint64_t perms)
 {
     int rc = -1;
     size_t page;

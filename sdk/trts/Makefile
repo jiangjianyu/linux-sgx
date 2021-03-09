@@ -40,6 +40,8 @@ CXXFLAGS += $(ENCLAVE_CXXFLAGS) \
             -fno-exceptions \
             -fno-rtti
 
+CFLAGS += -Dbool=int -Dtrue=1 -Dfalse=0
+
 TCXXFLAGS := $(patsubst -fstack-protector%,-fno-stack-protector,$(CXXFLAGS))
 
 OBJS1 := init_enclave.o  \
@@ -61,11 +63,11 @@ OBJS := $(OBJS1) $(OBJS2)
 
 all: $(OBJS) elf_parser
 
-$(OBJS1): %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -fPIC $< -o $@
+$(OBJS1): %.o: %.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -fPIC $< -o $@
 
-$(OBJS2): %.o: %.cpp
-	$(CXX) -c $(TCXXFLAGS) $(CPPFLAGS) -fPIC $< -o $@
+$(OBJS2): %.o: %.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -fPIC $< -o $@
 
 .PHONY: elf_parser
 elf_parser:

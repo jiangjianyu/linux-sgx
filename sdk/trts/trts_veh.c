@@ -179,13 +179,13 @@ int sgx_unregister_exception_handler(void *handler)
 
 // continue_execution(sgx_exception_info_t *info):
 //      try to restore the thread context saved in info to current execution context.
-extern "C" __attribute__((regparm(1))) void continue_execution(sgx_exception_info_t *info);
+__attribute__((regparm(1))) void continue_execution(sgx_exception_info_t *info);
 
 // internal_handle_exception(sgx_exception_info_t *info):
 //      the 2nd phrase exception handing, which traverse registered exception handlers.
 //      if the exception can be handled, then continue execution
 //      otherwise, throw abortion, go back to 1st phrase, and call the default handler.
-extern "C" __attribute__((regparm(1))) void internal_handle_exception(sgx_exception_info_t *info)
+__attribute__((regparm(1))) void internal_handle_exception(sgx_exception_info_t *info)
 {
     int status = EXCEPTION_CONTINUE_SEARCH;
     handler_node_t *node = NULL;
@@ -299,7 +299,7 @@ static int expand_stack_by_pages(void *start_addr, size_t page_count)
 // Return Value
 //      none zero - success
 //              0 - fail
-extern "C" sgx_status_t trts_handle_exception(void *tcs)
+sgx_status_t trts_handle_exception(void *tcs)
 {
     thread_data_t *thread_data = get_thread_data();
     ssa_gpr_t *ssa_gpr = NULL;
@@ -327,7 +327,7 @@ extern "C" sgx_status_t trts_handle_exception(void *tcs)
     }
 
     // no need to check the result of ssa_gpr because thread_data is always trusted
-    ssa_gpr = reinterpret_cast<ssa_gpr_t *>(thread_data->first_ssa_gpr);
+    ssa_gpr = (ssa_gpr_t *)(thread_data->first_ssa_gpr);
     
     sp = ssa_gpr->REG(sp);
     if(!is_stack_addr((void*)sp, 0))  // check stack overrun only, alignment will be checked after exception handled

@@ -38,8 +38,8 @@
 #include "util.h"
 #include "trts_internal.h"
 
-extern "C" sgx_status_t asm_oret(uintptr_t sp, void *ms);
-extern "C" sgx_status_t __morestack(const unsigned int index, void *ms);
+sgx_status_t asm_oret(uintptr_t sp, void *ms);
+sgx_status_t __morestack(const unsigned int index, void *ms);
 #define do_ocall __morestack
 
 //
@@ -65,7 +65,7 @@ sgx_status_t sgx_ocall(const unsigned int index, void *ms)
             (index != (unsigned int)EDMM_TRIM) &&
             (index != (unsigned int)EDMM_TRIM_COMMIT) &&
             (index != (unsigned int)EDMM_MODPR) &&
-            static_cast<size_t>(index) >= g_dyn_entry_table.nr_ocall)
+            (size_t)(index) >= g_dyn_entry_table.nr_ocall)
     {
         return SGX_ERROR_INVALID_FUNCTION;
     }
@@ -76,7 +76,7 @@ sgx_status_t sgx_ocall(const unsigned int index, void *ms)
     return status;
 }
 
-extern "C"
+
 uintptr_t update_ocall_lastsp(ocall_context_t* context)
 {
     thread_data_t* thread_data = get_thread_data();
@@ -93,11 +93,11 @@ uintptr_t update_ocall_lastsp(ocall_context_t* context)
     } else {
         // thread_data->last_sp is only set when ocall or exception handling occurs
         // ocall is block during exception handling, so last_sp is always ocall frame here
-        ocall_context_t* context_pre = reinterpret_cast<ocall_context_t*>(context->pre_last_sp);
+        ocall_context_t* context_pre = (ocall_context_t*)(context->pre_last_sp);
         context->ocall_depth = context_pre->ocall_depth + 1;
     }
 
-    thread_data->last_sp = reinterpret_cast<uintptr_t>(context);
+    thread_data->last_sp = (uintptr_t)(context);
 
     return last_sp;
 }
@@ -106,7 +106,7 @@ sgx_status_t do_oret(void *ms)
 {
     thread_data_t *thread_data = get_thread_data();
     uintptr_t last_sp = thread_data->last_sp;
-    ocall_context_t *context = reinterpret_cast<ocall_context_t*>(thread_data->last_sp);
+    ocall_context_t *context = (ocall_context_t*)(thread_data->last_sp);
     if(0 == last_sp || last_sp <= (uintptr_t)&context)
     {
         return SGX_ERROR_UNEXPECTED;

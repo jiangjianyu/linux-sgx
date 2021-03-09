@@ -40,7 +40,7 @@
 #define SYNTHETIC_STATE_SIZE   (512 + 64)  // 512 for legacy regs, 64 for xsave header
 //FXRSTOR only cares about the first 512 bytes, while
 //XRSTOR in compacted mode will ignore the first 512 bytes.
-extern "C" SE_DECLSPEC_ALIGN(XSAVE_ALIGN_SIZE) const uint32_t
+SE_DECLSPEC_ALIGN(XSAVE_ALIGN_SIZE) const uint32_t
 SYNTHETIC_STATE[SYNTHETIC_STATE_SIZE/sizeof(uint32_t)] = {
     0x037F, 0, 0, 0, 0, 0, 0x1F80, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
