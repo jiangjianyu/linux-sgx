@@ -42,7 +42,7 @@ CXXFLAGS += $(ENCLAVE_CXXFLAGS) \
 
 CFLAGS += -Dbool=int -Dtrue=1 -Dfalse=0
 
-TCXXFLAGS := $(patsubst -fstack-protector%,-fno-stack-protector,$(CXXFLAGS))
+TCFLAGS := $(patsubst -fstack-protector%,-fno-stack-protector,$(CFLAGS))
 
 OBJS1 := init_enclave.o  \
         trts.o           \
@@ -67,7 +67,7 @@ $(OBJS1): %.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -fPIC $< -o $@
 
 $(OBJS2): %.o: %.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) -fPIC $< -o $@
+	$(CC) -c $(TCFLAGS) $(CPPFLAGS) -fPIC $< -o $@
 
 .PHONY: elf_parser
 elf_parser:

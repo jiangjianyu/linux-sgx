@@ -36,7 +36,7 @@ CPPFLAGS += -I$(COMMON_DIR)/inc/         \
             -I$(COMMON_DIR)/inc/internal \
             -I$(LINUX_SDK_DIR)/trts/
 
-CFLAGS   += $(ENCLAVE_CFLAGS)
+CFLAGS   += $(ENCLAVE_CFLAGS) -Wno-error=strict-prototypes -Wno-error=sign-conversion -Dtrue=1 -Dfalse=0
 ASFLAGS  := -DSE_SIM -Werror $(CFLAGS)
 CFLAGS   += -DSE_SIM -Werror -fasynchronous-unwind-tables
 CXXFLAGS += -DSE_SIM -Werror $(ENCLAVE_CXXFLAGS)\
@@ -93,7 +93,8 @@ SC_OBJ := setcontext.o
 
 LIBTRTS := libsgx_trts_sim.a
 
-vpath %.cpp $(TRTS_DIR):$(TINST_DIR)
+vpath %.c $(TRTS_DIR)
+vpath %.cpp $(TINST_DIR)
 vpath %.S   $(LOWLIB_DIR):$(TLDR_DIR):$(SC_DIR):$(XSAVE_DIR)
 vpath %.c   $(TLS_DIR):$(TLDR_DIR)
 
@@ -108,7 +109,7 @@ $(LIBTRTS): $(TRTS_OBJS) $(TINST_OBJS) $(LOWLIB_OBJS) $(TLS_OBJS) $(TLDR_OBJS) $
 # ------------------------------------------------------------
 $(TRTS1_OBJS):    CPPFLAGS += -I$(COMMON_DIR)/inc/tlibc \
                              -I$(SIM_DIR)/tinst/
-$(TRTS2_OBJS): %.o:%.cpp
+$(TRTS2_OBJS): %.o:%.c
 	$(CXX) -c $(filter-out -fstack-protector-strong, $(CXXFLAGS)) -I$(SIM_DIR)/tinst/ $(CPPFLAGS) $< -o $@
 
 

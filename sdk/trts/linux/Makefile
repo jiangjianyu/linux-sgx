@@ -48,11 +48,11 @@ TCFLAGS   += -nostdinc \
 
 LDCFLAGS  := -shared -nostdlib -nodefaultlibs -nostartfiles
 
-CPP_SRCS  := $(wildcard ../*.cpp)
+CPP_SRCS  := $(wildcard ../*.c)
 C_SRCS    := $(wildcard *.c)
 ASM_SRCS  := $(wildcard *.S) \
              $(COMMON_DIR)/src/linux/xsave_gnu.S
-OBJS      := $(CPP_SRCS:.cpp=.o)
+OBJS      := $(CPP_SRCS:.c=.o)
 OBJS      += $(C_SRCS:.c=.o)
 OBJS      += $(ASM_SRCS:.S=.o)
 OBJS      := $(sort $(OBJS))

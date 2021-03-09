@@ -43,6 +43,9 @@
 #include "trts_inst.h"
 #include "trts_emodpr.h"
 #include "metadata.h"
+
+#include "stdbool.h"
+
 #  include "linux/elf_parser.h"
 #  define GET_TLS_INFO  elf_tls_info
 
