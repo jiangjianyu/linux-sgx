@@ -71,7 +71,7 @@ int heap_init(void *_heap_base, size_t _heap_size, size_t _heap_min_size, int _i
     return SGX_SUCCESS;
 }
 
-void* sbrk(intptr_t n)
+void* ssbrk(intptr_t n)
 {
     static size_t heap_used;
     void *heap_ptr = NULL;

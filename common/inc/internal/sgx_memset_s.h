@@ -31,7 +31,7 @@
 
 #ifndef _SE_MEMSET_S_H
 #define _SE_MEMSET_S_H
-#include <cstddef>
+#include <stddef.h>
 #ifdef __cplusplus
 extern "C"
 #endif

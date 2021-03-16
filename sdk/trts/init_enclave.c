@@ -58,6 +58,12 @@ const volatile global_data_t g_global_data = {1, 2, 3, 4,
    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0, 0, 0}, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, {{{0, 0, 0, 0, 0, 0, 0}}}};
 uint32_t g_enclave_state = ENCLAVE_INIT_NOT_STARTED;
 
+#if defined(__STDC__) || defined(__cplusplus) 
+# define __STRING(x)    #x
+#else
+# define __STRING(x)    "x"
+#endif
+
 uintptr_t __stack_chk_guard = 0;
 #define __weak_alias(alias,sym)                 \
     __asm__(".weak " __STRING(alias) " ; "      \

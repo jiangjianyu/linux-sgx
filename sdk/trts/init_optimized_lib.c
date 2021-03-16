@@ -95,10 +95,10 @@ int init_optimized_libs(const uint64_t feature_bit_array, uint64_t xfrm)
     }
 
     // Init string library with the global feature indicator
-    if(sgx_init_string_lib(g_cpu_feature_indicator) != 0)
-    {
-        return -1;
-    }
+    // if(sgx_init_string_lib(g_cpu_feature_indicator) != 0)
+    // {
+    //     return -1;
+    // }
 
     // Init IPP crypto library with the global feature indicator	
     if(sgx_init_crypto_lib(g_cpu_feature_indicator) != 0)

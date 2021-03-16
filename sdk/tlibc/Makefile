@@ -46,12 +46,12 @@ CPPFLAGS += -I.                          \
 ifneq ($(USE_OPT_LIBS), 0)
 CFLAGS += -D_TLIBC_USE_INTEL_FAST_STRING_
 CXXFLAGS += -D_TLIBC_USE_INTEL_FAST_STRING_
-LIBC_C_SRCS := $(wildcard gen/*.c gdtoa/*.c locale/*.c math/*.c stdlib/*.c string/*.c stdio/*.c time/*.c) 
+LIBC_C_SRCS := $(wildcard gen/*.c) 
 else
-LIBC_C_SRCS := $(wildcard gen/*.c gdtoa/*.c locale/*.c stdlib/*.c string/*.c stdio/*.c time/*.c)
+LIBC_C_SRCS := $(wildcard gen/*.c)
 endif
 
-LIBC_CPP_SRCS := $(wildcard gen/*.cpp) tstdc_version.cpp
+LIBC_CPP_SRCS := 
 LIBC_ASM_SRCS := $(wildcard gen/*.S)
 
 LIBC_OBJS := $(LIBC_C_SRCS:.c=.o)
